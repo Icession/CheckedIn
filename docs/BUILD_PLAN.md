@@ -16,9 +16,9 @@ Goal: backend and frontend run and talk to each other.
 - [x] Folder structure, `CLAUDE.md`, `README.md`, docs
 - [x] Spring Boot backend with `GET /api/health` (checks the database)
 - [x] React frontend home page that shows backend and database status
-- [ ] **You:** create a Supabase project, then create `backend/.env` from `.env.example` with its connection details
-- [ ] **You:** run backend and frontend, see "Backend: UP" and "Database: UP"
-- [ ] **You:** `git init`, first commit, push to GitHub
+- [x] **You:** create a Supabase project, then create `backend/.env` from `.env.example` with its connection details
+- [x] **You:** run backend and frontend, see "Backend: UP" and "Database: UP"
+- [x] **You:** `git init`, first commit, push to GitHub
 
 ---
 
@@ -27,7 +27,7 @@ Goal: backend and frontend run and talk to each other.
 Goal: professors and students sign in with Microsoft and land on their own page.
 
 Steps (do them one at a time):
-- [ ] 1a. `auth/User` entity, `Role` enum, `UserRepository`, `GlobalExceptionHandler`
+- [x] 1a. `auth/User` entity, `Role` enum, `UserRepository`, `GlobalExceptionHandler`
 - [ ] 1b. Register the app in Microsoft Entra ID (manual; Claude Code writes the step-by-step guide into the README)
 - [ ] 1c. Frontend: "Sign in with Microsoft" button (library: `@azure/msal-browser`)
 - [ ] 1d. Backend: verify the Microsoft ID token, check the email domain, create the user,
