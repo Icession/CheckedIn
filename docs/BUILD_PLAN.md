@@ -28,7 +28,7 @@ Goal: professors and students sign in with Microsoft and land on their own page.
 
 Steps (do them one at a time):
 - [x] 1a. `auth/User` entity, `Role` enum, `UserRepository`, `GlobalExceptionHandler`
-- [ ] 1b. Register the app in Microsoft Entra ID (manual; Claude Code writes the step-by-step guide into the README)
+- [x] 1b. Register the app in Microsoft Entra ID (manual; Claude Code writes the step-by-step guide into the README)
 - [ ] 1c. Frontend: "Sign in with Microsoft" button (library: `@azure/msal-browser`)
 - [ ] 1d. Backend: verify the Microsoft ID token, check the email domain, create the user,
       start an HttpOnly session cookie (8 hours) (library: `spring-boot-starter-oauth2-resource-server`, `spring-boot-starter-security`)
