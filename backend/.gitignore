@@ -1,0 +1,10 @@
+# Build output
+target/
+
+# Local secrets
+.env
+
+# IDE files
+.idea/
+*.iml
+.vscode/

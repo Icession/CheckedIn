@@ -1,0 +1,4 @@
+# Each folder (backend/, frontend/) has its own .gitignore too.
+.env
+.DS_Store
+Thumbs.db

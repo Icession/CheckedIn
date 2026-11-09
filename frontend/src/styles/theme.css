@@ -1,0 +1,25 @@
+/* theme.css — every color and size used in CheckedIn.
+   Change a value here and it updates the whole app. */
+:root {
+  /* Brand */
+  --color-primary: #2f5597;
+  --color-primary-light: #dce6f2;
+
+  /* Text and backgrounds */
+  --color-text: #1f2937;
+  --color-text-muted: #6b7280;
+  --color-bg: #f5f7fb;
+  --color-surface: #ffffff;
+  --color-border: #d6dde8;
+
+  /* Attendance status colors (SRS FR-038) */
+  --status-present: #22a55b; /* green  — P */
+  --status-late: #e6b800;    /* yellow — L */
+  --status-absent: #d94141;  /* red    — A */
+  --status-excused: #3b7ddd; /* blue   — E */
+
+  /* Sizes */
+  --radius: 10px;
+  --space: 16px;
+  --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
