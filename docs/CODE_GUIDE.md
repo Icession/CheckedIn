@@ -39,7 +39,7 @@ requirement to its code.
 | Package | SRS feature | What it holds |
 |---|---|---|
 | `common/` | — | Health check, global error handler, shared config, security config |
-| `auth/` | Feature 1: Microsoft login and roles | `User`, `Role`, login, student ID linking |
+| `auth/` | Feature 1: Sign-in and roles | `User`, `Role`, `LoginCode`, email-code and Google sign-in, student ID linking |
 | `section/` | Feature 2: Sections and sessions | `CourseSection`, `ClassSession`, schedule rules |
 | `layout/` | Feature 3: Layout builder | `RoomLayout`, `Seat`, `CellType` |
 | `roster/` | Feature 4: Class list import | `Enrollment`, Excel import and validation |
@@ -50,7 +50,7 @@ requirement to its code.
 | `student/` | Feature 9: Student attendance page | Read-only endpoints for students |
 | `notification/` | Feature 10: Emails | `NotificationLog`, Brevo email sending |
 | `export/` | Feature 11: Excel export | Builds the .xlsx file |
-| `integration/` | External systems | `IdentityProvider`, `FileStorageService`, `EmailService` interfaces and their Microsoft / Cloudinary / Brevo classes |
+| `integration/` | External systems | `IdentityProvider`, `FileStorageService`, `EmailService` interfaces and their Google / Cloudinary / Brevo classes |
 
 Inside every feature folder, files follow the same pattern:
 
@@ -77,7 +77,7 @@ All React code is under `frontend/src/`.
 | `App.jsx` | List of all pages (routes). Start here to find which component shows a URL |
 | `pages/` | One file per screen, e.g. `AttendancePage.jsx` |
 | `components/` | Small reusable pieces, e.g. `StatusPill.jsx`, `SeatCell.jsx` |
-| `api/` | All calls to the backend, one file per feature, e.g. `sectionApi.js` |
+| `api/` | Every call that leaves the browser: to the backend (one file per feature, e.g. `sectionApi.js`) and to Google sign-in (`googleSignIn.js`) |
 | `styles/theme.css` | All colors and sizes, including attendance status colors |
 | `styles/global.css` | Shared basic styles |
 
@@ -104,7 +104,10 @@ When a feature has several pages, group them: `pages/attendance/AttendancePage.j
 |---|---|
 | The 3-lates / 18-hours rule | `absence/AbsenceCalculator.java` |
 | How seats are auto-arranged A–Z | `seating/SeatArrangementService.java` |
-| Microsoft login checks | `auth/` and `integration/EntraIdProvider.java` |
+| Sign-in page (email code and Google button) | `frontend/src/pages/SignInPage.jsx` |
+| How sign-in codes are made, hashed and checked | `auth/LoginCodeService.java` |
+| Google token checks | `integration/GoogleIdentityProvider.java` |
+| Where sign-in codes are emailed | `integration/BrevoEmailService.java` |
 | Where excuse files are uploaded | `integration/CloudinaryStorageService.java` |
 | Where emails are sent | `integration/BrevoEmailService.java` |
 | Rule numbers (3, 18, 12, 15, 7) | `backend/src/main/resources/application.properties` |

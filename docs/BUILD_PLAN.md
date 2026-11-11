@@ -22,23 +22,37 @@ Goal: backend and frontend run and talk to each other.
 
 ---
 
-## Phase 1 — Users and Microsoft sign-in (Feature 1: FR-001 – FR-009)
+## Phase 1 — Users and sign-in (Feature 1: FR-001 – FR-009)
 
-Goal: professors and students sign in with Microsoft and land on their own page.
+Goal: professors and students sign in with an email code or Google and land on their own page.
+
+> **Change of plan (Nov 9):** Microsoft sign-in was dropped because CIT-U's Microsoft tenant
+> requires IT admin approval ("Need admin approval"). Sign-in is now an emailed code (Brevo) or
+> Google. The SRS was updated to match; FR numbers did not change.
 
 Steps (do them one at a time):
 - [x] 1a. `auth/User` entity, `Role` enum, `UserRepository`, `GlobalExceptionHandler`
-- [x] 1b. Register the app in Microsoft Entra ID (manual; Claude Code writes the step-by-step guide into the README)
-- [ ] 1c. Frontend: "Sign in with Microsoft" button (library: `@azure/msal-browser`)
-- [ ] 1d. Backend: verify the Microsoft ID token, check the email domain, create the user,
-      start an HttpOnly session cookie (8 hours) (library: `spring-boot-starter-oauth2-resource-server`, `spring-boot-starter-security`)
-- [ ] 1e. Role from the professor email list in `application.properties` (FR-004)
-- [ ] 1f. Student ID linking page on first sign-in (FR-005 – FR-007)
-- [ ] 1g. Professor and student dashboards (empty for now), sign out, 403 on wrong role (FR-008, FR-009)
+- [x] 1b. ~~Register the app in Microsoft Entra ID~~ (dropped, see note above)
+- [ ] 1c. Remove Microsoft sign-in: drop the uncommitted MSAL work, remove `@azure/msal-browser`,
+      the Entra README section and `ENTRA_*` settings. In `User`, replace `msObjectId` with an
+      optional `googleSubject`, and find users by email (see ERD)
+- [ ] 1d. Brevo: account + verified sender (README guide), `integration/EmailService` + `BrevoEmailService`.
+      Send one test email to your @cit.edu inbox and check it doesn't land in Junk
+- [ ] 1e. Email-code sign-in (FR-001, FR-002, NFR-011): `LoginCode` entity, `LoginCodeService`,
+      `POST /api/auth/code` and `POST /api/auth/code/verify`, sign-in page (email, then code),
+      HttpOnly session cookie for 8 hours (library: `spring-boot-starter-security`)
+- [ ] 1f. Google sign-in (FR-001, FR-002): Google Cloud OAuth client ID (README guide),
+      "Sign in with Google" button (Google Identity Services script), `POST /api/auth/google`,
+      backend verifies the ID token with Google's public keys
+      (library: `spring-boot-starter-oauth2-resource-server`), `integration/GoogleIdentityProvider`
+- [ ] 1g. Create the account on first sign-in, ask email-code users for their name (FR-003),
+      role from the professor email list in settings (FR-004)
+- [ ] 1h. Student ID linking page on first sign-in (FR-005 – FR-007)
+- [ ] 1i. Professor and student dashboards (empty for now), sign out, 403 on wrong role (FR-008, FR-009)
 
-Done when: you sign in with Microsoft and see the correct dashboard for your role.
+Done when: you can sign in both ways with your @cit.edu email and see the correct dashboard for your role.
 
-Ask Claude Code: *"Start Phase 1, step 1a from docs/BUILD_PLAN.md."*
+Ask Claude Code: *"Start Phase 1, step 1c from docs/BUILD_PLAN.md."*
 
 ---
 
@@ -129,7 +143,7 @@ Done when: you can check a 42-student class in under 2 minutes (NFR-016).
 
 ## Phase 10 — Email notifications with Brevo (Feature 10: FR-064 – FR-069)
 
-- [ ] `NotificationLog` entity, `integration/EmailService` + `BrevoEmailService`
+- [ ] `NotificationLog` entity (`EmailService` + `BrevoEmailService` already exist from step 1d)
 - [ ] Emails at 12 h, 15 h, dropped, excuse result; each warning once; 3 retries
 
 ---
