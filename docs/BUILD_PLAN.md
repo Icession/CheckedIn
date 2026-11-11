@@ -38,7 +38,7 @@ Steps (do them one at a time):
       optional `googleSubject`, and find users by email (see ERD)
 - [ ] 1d. Brevo: account + verified sender (README guide), `integration/EmailService` + `BrevoEmailService`.
       Send one test email to your @cit.edu inbox and check it doesn't land in Junk
-- [ ] 1e. Email-code sign-in (FR-001, FR-002, NFR-011): `LoginCode` entity, `LoginCodeService`,
+- [ ] 1e. Email-code sign-in (FR-001, FR-002, NFR-008): `LoginCode` entity, `LoginCodeService`,
       `POST /api/auth/code` and `POST /api/auth/code/verify`, sign-in page (email, then code),
       HttpOnly session cookie for 8 hours (library: `spring-boot-starter-security`)
 - [ ] 1f. Google sign-in (FR-001, FR-002): Google Cloud OAuth client ID (README guide),
@@ -46,6 +46,8 @@ Steps (do them one at a time):
       backend verifies the ID token with Google's public keys
       (library: `spring-boot-starter-oauth2-resource-server`), `integration/GoogleIdentityProvider`
 - [ ] 1g. Create the account on first sign-in, ask email-code users for their name (FR-003),
+      and show the same name form to Google users when Google doesn't send both
+      `given_name` and `family_name`,
       role from the professor email list in settings (FR-004)
 - [ ] 1h. Student ID linking page on first sign-in (FR-005 – FR-007)
 - [ ] 1i. Professor and student dashboards (empty for now), sign out, 403 on wrong role (FR-008, FR-009)

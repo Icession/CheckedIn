@@ -31,7 +31,7 @@ unless I say yes first. If a new library is truly needed, explain why and ask.
 - Sign-in (Feature 1): two ways, and NO passwords are ever stored.
   1. Email code: user enters an @cit.edu email, Brevo sends a 6-digit code. Codes are saved only
      as a hash, expire after 10 minutes, allow 5 wrong tries, work once, and an email can request
-     at most 3 codes every 15 minutes (NFR-011).
+     at most 3 codes every 15 minutes (NFR-008).
   2. Google: accept the Google ID token only if the signature, issuer, audience and expiry are
      valid, `email_verified` is true, and the email ends in @cit.edu.
   Allowed email domain(s) and the professor email list live in `application.properties` / `.env`.
