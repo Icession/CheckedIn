@@ -33,7 +33,7 @@ Goal: professors and students sign in with an email code or Google and land on t
 Steps (do them one at a time):
 - [x] 1a. `auth/User` entity, `Role` enum, `UserRepository`, `GlobalExceptionHandler`
 - [x] 1b. ~~Register the app in Microsoft Entra ID~~ (dropped, see note above)
-- [ ] 1c. Remove Microsoft sign-in: drop the uncommitted MSAL work, remove `@azure/msal-browser`,
+- [x] 1c. Remove Microsoft sign-in: drop the uncommitted MSAL work, remove `@azure/msal-browser`,
       the Entra README section and `ENTRA_*` settings. In `User`, replace `msObjectId` with an
       optional `googleSubject`, and find users by email (see ERD)
 - [ ] 1d. Brevo: account + verified sender (README guide), `integration/EmailService` + `BrevoEmailService`.

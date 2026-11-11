@@ -13,8 +13,8 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 /**
- * A person who signs in to CheckedIn with their CIT-U Microsoft account: a professor or a student.
- * One row in the "users" table (see the ERD in the SRS, Figure 2).
+ * A person who signs in to CheckedIn with their @cit.edu email (emailed code or Google):
+ * a professor or a student. One row in the "users" table (see the ERD in the SRS, Figure 2).
  * Covers FR-003 (account created on first sign-in), FR-004 (role) and FR-005 (linked student ID).
  */
 @Entity
@@ -27,10 +27,11 @@ public class User {
     @Column(name = "user_id")
     private Long userId;
 
-    // The ID Microsoft gives this account. It never changes, so we use it to find the user at each sign-in.
-    @Column(name = "ms_object_id", length = 64, nullable = false, unique = true)
-    private String msObjectId;
+    // The account ID Google gives this user. Filled only for users who have signed in with Google.
+    @Column(name = "google_subject", length = 255, unique = true)
+    private String googleSubject;
 
+    // Both sign-in methods end with a proven @cit.edu email, so we find users by their email
     @Column(name = "email", length = 120, nullable = false, unique = true)
     private String email;
 
@@ -60,8 +61,7 @@ public class User {
     protected User() {
     }
 
-    public User(String msObjectId, String email, String firstName, String lastName, Role role) {
-        this.msObjectId = msObjectId;
+    public User(String email, String firstName, String lastName, Role role) {
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -87,14 +87,18 @@ public class User {
     }
 
     // ---------- Getters and setters ----------
-    // There are no setters for userId, msObjectId, and createdAt because they never change.
+    // There are no setters for userId and createdAt because they never change.
 
     public Long getUserId() {
         return userId;
     }
 
-    public String getMsObjectId() {
-        return msObjectId;
+    public String getGoogleSubject() {
+        return googleSubject;
+    }
+
+    public void setGoogleSubject(String googleSubject) {
+        this.googleSubject = googleSubject;
     }
 
     public String getEmail() {

@@ -11,8 +11,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    // FR-003: at each sign-in, look up the user by the ID Microsoft returns
-    Optional<User> findByMsObjectId(String msObjectId);
+    // FR-003: after an email-code or Google sign-in, look up the user by their proven email
+    Optional<User> findByEmail(String email);
 
     // FR-006: reject a student ID that is already linked to another account
     boolean existsByStudentNumber(String studentNumber);
