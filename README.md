@@ -49,6 +49,78 @@ Tables are created automatically by the backend (Hibernate) the first time it ru
 Free Supabase projects pause after about a week without use. If that happens, open the
 dashboard and click **Restore project**.
 
+## Set up Brevo for emails (one time)
+
+CheckedIn emails users their 6-digit sign-in code (FR-001) and, later, absence warnings and
+excuse results (FR-064 – FR-069). It sends them through **Brevo**, an email service with a free plan.
+
+If a Brevo screen looks different from these steps, follow Brevo's own guides:
+[Create a sender](https://help.brevo.com/hc/en-us/articles/208836149-Create-a-new-sender-From-name-and-From-email),
+[Create an API key](https://help.brevo.com/hc/en-us/articles/209467485-Create-and-manage-your-API-keys).
+
+### Step 1: Choose the sender address
+
+The sender is the address the emails come "from". Use **an address made just for CheckedIn**,
+for example a new Gmail account such as `checkedin.yourname@gmail.com`, so your personal address
+is not shown to students. You must be able to open its inbox once, to verify it.
+
+- **Don't use your `@cit.edu` address as the sender.** Only CIT-U's IT can allow Brevo to send
+  emails for `cit.edu`. Without that, Outlook may treat the email as a fake CIT-U email.
+- Brevo cannot prove that a free address like Gmail belongs to it, so it sends from one of its
+  own `brevosend.com` addresses instead and keeps the name **CheckedIn**. In our test (Nov 2026),
+  Outlook showed **From: CheckedIn** `<yourname@12345678.brevosend.com>` and the email arrived
+  in the Inbox. That is normal.
+  Sending from a domain you own gives the best delivery, but it costs money and is optional.
+
+### Step 2: Create the account and verify the sender
+
+1. Sign up for a free account at https://www.brevo.com. If Brevo asks you to complete your
+   profile or confirm your account, do that first.
+2. Open the **Senders** settings (Brevo groups them with domains and IPs) and add a sender:
+   - **From name:** `CheckedIn`
+   - **From email:** the address from Step 1
+3. Brevo emails a code or a link to that address. Enter the code (or open the link) to verify it.
+
+### Step 3: Create an API key
+
+1. Open the API key settings. Brevo's [quickstart](https://developers.brevo.com/docs/quickstart)
+   has a direct link.
+2. On the **API keys** tab, click **Generate a new API key** and name it `CheckedIn backend`.
+3. **Copy the key right away. Brevo shows it only once.** Make sure it is an **API key**,
+   not an SMTP key.
+
+### Step 4: Add the settings to `backend/.env`
+
+Copy the Brevo lines from `backend/.env.example` into your `backend/.env` and fill them in:
+
+```properties
+BREVO_API_KEY=the key from Step 3
+BREVO_SENDER_EMAIL=the verified address from Step 1
+BREVO_SENDER_NAME=CheckedIn
+```
+
+The API key is a secret. Keep it only in `backend/.env`, which git ignores (NFR-011).
+Without these settings the app still runs; it just cannot send emails.
+
+### Step 5: Send a test email
+
+In PowerShell, from the `backend` folder (keep the double quotes, PowerShell needs them):
+
+```powershell
+.\mvnw.cmd spring-boot:run "-Dspring-boot.run.arguments=--spring.main.web-application-type=none --checkedin.test-email-to=your.name@cit.edu"
+```
+
+Replace `your.name@cit.edu` with your own CIT-U address. The app starts, sends one email,
+prints a line that starts with **TEST EMAIL SENT** (or **TEST EMAIL NOT SENT** and the reason),
+and stops.
+
+Then open your CIT-U Outlook:
+
+- **In the Inbox:** Brevo works.
+- **In Junk Email:** open it and mark it as **Not junk**. The sign-in page will remind users to
+  check Junk if a code doesn't arrive (SRS 1.6).
+- **Not there after a few minutes:** see Troubleshooting below.
+
 ## Run the project (Windows)
 
 **1. Backend**
@@ -88,3 +160,9 @@ cd backend
 | `JAVA_HOME is not set` | Install JDK 17+ and set `JAVA_HOME` to its folder |
 | Port 8080 already in use | Stop the other app, or set `SERVER_PORT=8081` in `backend/.env` and update `frontend/vite.config.js` |
 | New values in `.env` are ignored | Restart the backend and `npm run dev`. Both read `.env` only when they start |
+| `TEST EMAIL NOT SENT: Brevo is not set up` | Add `BREVO_API_KEY` and `BREVO_SENDER_EMAIL` to `backend/.env` (see "Set up Brevo"), then run the test again |
+| `Brevo rejected the email (401 UNAUTHORIZED)` | The API key is wrong: create a new **API key** (not an SMTP key) and paste it without spaces or quotes. If the backend log says Brevo doesn't recognize your IP address, authorize it from Brevo's email or under your name → **Security** → **Authorized IPs** |
+| `Brevo rejected the email (400 BAD_REQUEST)` | Usually `BREVO_SENDER_EMAIL` is not a verified sender. Compare it with the address on Brevo's Senders page. The log line just above shows Brevo's own message |
+| `Brevo rejected the email` with any other code | Read Brevo's own message in the log line just above it. New Brevo accounts sometimes need their profile completed or the account confirmed first |
+| `Could not reach Brevo` | Check your internet connection and try again |
+| The test email is in **Junk Email** | Mark it as **Not junk**. For better delivery, send from a domain you own and authenticate it in Brevo (optional) |

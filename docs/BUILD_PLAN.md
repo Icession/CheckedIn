@@ -36,7 +36,7 @@ Steps (do them one at a time):
 - [x] 1c. Remove Microsoft sign-in: drop the uncommitted MSAL work, remove `@azure/msal-browser`,
       the Entra README section and `ENTRA_*` settings. In `User`, replace `msObjectId` with an
       optional `googleSubject`, and find users by email (see ERD)
-- [ ] 1d. Brevo: account + verified sender (README guide), `integration/EmailService` + `BrevoEmailService`.
+- [x] 1d. Brevo: account + verified sender (README guide), `integration/EmailService` + `BrevoEmailService`.
       Send one test email to your @cit.edu inbox and check it doesn't land in Junk
 - [ ] 1e. Email-code sign-in (FR-001, FR-002, NFR-008): `LoginCode` entity, `LoginCodeService`,
       `POST /api/auth/code` and `POST /api/auth/code/verify`, sign-in page (email, then code),

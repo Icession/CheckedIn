@@ -38,7 +38,7 @@ requirement to its code.
 
 | Package | SRS feature | What it holds |
 |---|---|---|
-| `common/` | — | Health check, global error handler, shared config, security config |
+| `common/` | — | Setup checks (health check, test email), global error handler, shared config, security config |
 | `auth/` | Feature 1: Sign-in and roles | `User`, `Role`, `LoginCode`, email-code and Google sign-in, student ID linking |
 | `section/` | Feature 2: Sections and sessions | `CourseSection`, `ClassSession`, schedule rules |
 | `layout/` | Feature 3: Layout builder | `RoomLayout`, `Seat`, `CellType` |
@@ -110,6 +110,7 @@ When a feature has several pages, group them: `pages/attendance/AttendancePage.j
 | Where sign-in codes are emailed | `integration/BrevoEmailService.java` |
 | Where excuse files are uploaded | `integration/CloudinaryStorageService.java` |
 | Where emails are sent | `integration/BrevoEmailService.java` |
+| The text of every email (subject and body) | `integration/EmailTemplate.java` |
 | Rule numbers (3, 18, 12, 15, 7) | `backend/src/main/resources/application.properties` |
 | Status colors | `frontend/src/styles/theme.css` |
 | All URLs of the app | `frontend/src/App.jsx` |
