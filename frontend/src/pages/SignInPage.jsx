@@ -1,6 +1,6 @@
 // SignInPage — the first page of CheckedIn. Sign in with a code sent to your CIT-U email,
-// or with GitHub; on the first sign-in, enter your name. Covers FR-001 – FR-004.
-// The dashboards come in step 1i.
+// or with GitHub. On the first sign-in, enter your name; students also link their student ID.
+// Covers FR-001 – FR-005. The dashboards come in step 1i.
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { getCurrentUser } from '../api/authApi.js'
@@ -8,6 +8,7 @@ import SendCodeForm from '../components/SendCodeForm.jsx'
 import VerifyCodeForm from '../components/VerifyCodeForm.jsx'
 import GitHubSignInButton from '../components/GitHubSignInButton.jsx'
 import NameForm from '../components/NameForm.jsx'
+import StudentIdForm from '../components/StudentIdForm.jsx'
 
 const ROLE_LABELS = { PROFESSOR: 'Professor', STUDENT: 'Student' }
 
@@ -27,6 +28,7 @@ export default function SignInPage() {
   const [codeSentTo, setCodeSentTo] = useState(null)
   const [searchParams] = useSearchParams()
   const gitHubError = SIGN_IN_ERROR_MESSAGES[searchParams.get('signInError')]
+  const isSignedIn = !isChecking && currentUser !== null
 
   useEffect(() => {
     getCurrentUser()
@@ -43,13 +45,16 @@ export default function SignInPage() {
       <section className="card sign-in-card">
         {isChecking && <p className="muted">Loading…</p>}
 
-        {/* First sign-in: no account yet until the name is saved (FR-003) */}
-        {!isChecking && currentUser && currentUser.needsName && (
-          <NameForm email={currentUser.email} onSaved={setCurrentUser} />
+        {/* First sign-in, step 1: no account yet until the name is saved (FR-003) */}
+        {isSignedIn && currentUser.needsName && <NameForm email={currentUser.email} onSaved={setCurrentUser} />}
+
+        {/* First sign-in, step 2: a student links their student ID once (FR-005) */}
+        {isSignedIn && !currentUser.needsName && currentUser.needsStudentId && (
+          <StudentIdForm onLinked={setCurrentUser} />
         )}
 
         {/* Temporary: step 1i replaces this card with the professor and student dashboards */}
-        {!isChecking && currentUser && !currentUser.needsName && (
+        {isSignedIn && !currentUser.needsName && !currentUser.needsStudentId && (
           <div>
             <h2>Welcome, {currentUser.firstName}!</h2>
             <p>
@@ -59,6 +64,11 @@ export default function SignInPage() {
             <p>
               Role: <strong>{ROLE_LABELS[currentUser.role]}</strong>
             </p>
+            {currentUser.studentNumber && (
+              <p>
+                Student ID: <strong>{currentUser.studentNumber}</strong>
+              </p>
+            )}
           </div>
         )}
 

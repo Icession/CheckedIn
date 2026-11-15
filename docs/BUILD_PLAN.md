@@ -52,7 +52,9 @@ Steps (do them one at a time):
       @cit.edu email; `User.googleSubject` becomes `githubId` (Long). Same session cookie as 1e
 - [x] 1g. Create the account on first sign-in after EVERY user (both methods) enters their
       first and last name (FR-003), role from the professor email list in settings (FR-004)
-- [ ] 1h. Student ID linking page on first sign-in (FR-005 – FR-007)
+- [x] 1h. Student ID linking page on first sign-in (FR-005; FR-006: one ID per account).
+      Linking enrollments and the last-name check (rest of FR-006, FR-007) moved to Phase 4,
+      because there are no class lists yet
 - [ ] 1i. Professor and student dashboards (empty for now), sign out, 403 on wrong role (FR-008, FR-009)
       Next to sign-out, a short hint: "Using a shared computer? Also sign out of GitHub."
       (signing out of CheckedIn does not sign you out of GitHub, which would sign the next person in)
@@ -95,6 +97,9 @@ Done when: you can draw NGE207 as a lab and GLE201 as a lecture room with tables
 - [ ] `Enrollment` entity, `EnrollmentStatus` enum
 - [ ] Upload .xlsx (library: Apache POI `poi-ooxml`), preview rows with errors, confirm import
 - [ ] Add, edit, remove a single student
+- [ ] Link student accounts to enrollments with the same student ID and flag last-name mismatches
+      (FR-006, FR-007), both when a class list is imported and when a student links their ID later
+      (`AuthService.linkStudentNumber`). Moved here from step 1h
 - [ ] Downloadable blank template
 
 Done when: importing a 42-row Excel file shows a preview and saves only valid rows.

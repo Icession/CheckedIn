@@ -1,6 +1,7 @@
 package edu.cit.checkedin.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
@@ -13,6 +14,7 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,13 +22,16 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.server.ResponseStatusException;
 
 import edu.cit.checkedin.auth.dto.CurrentUserResponse;
 import edu.cit.checkedin.auth.dto.SaveNameRequest;
 
 /**
- * Tests account creation and roles (FR-001, FR-003, FR-004) with a fake database.
+ * Tests account creation, roles and the student ID (FR-001, FR-003 – FR-006) with a fake database.
  * The professor list in these tests holds one email: maria.santos@cit.edu.
  */
 @ExtendWith(MockitoExtension.class)
@@ -174,7 +179,86 @@ class AuthServiceTest {
         order.verify(userRepository).save(user);
     }
 
+    // ---------- Student ID (FR-005, FR-006) ----------
+
+    @Test
+    void onlyANewStudentAccountAsksForTheStudentId() {
+        assertThat(CurrentUserResponse.from(existingUser(STUDENT_EMAIL, Role.STUDENT)).needsStudentId()).isTrue();
+        assertThat(CurrentUserResponse.from(existingUser(PROFESSOR_EMAIL, Role.PROFESSOR)).needsStudentId()).isFalse();
+    }
+
+    @Test
+    void aStudentLinksTheirStudentId() {
+        User student = existingUser(STUDENT_EMAIL, Role.STUDENT);
+        when(userRepository.findByEmail(STUDENT_EMAIL)).thenReturn(Optional.of(student));
+        when(userRepository.existsByStudentNumber("12-3456-789")).thenReturn(false);
+        when(userRepository.saveAndFlush(student)).thenReturn(student);
+
+        CurrentUserResponse result = service.linkStudentNumber(STUDENT_EMAIL, "12-3456-789");
+
+        assertThat(student.getStudentNumber()).isEqualTo("12-3456-789");
+        assertThat(result.studentNumber()).isEqualTo("12-3456-789");
+        assertThat(result.needsStudentId()).isFalse();
+    }
+
+    @Test
+    void anIdAlreadyLinkedToAnotherAccountIsRefused() {
+        when(userRepository.findByEmail(STUDENT_EMAIL)).thenReturn(Optional.of(existingUser(STUDENT_EMAIL, Role.STUDENT)));
+        when(userRepository.existsByStudentNumber("12-3456-789")).thenReturn(true);
+
+        assertRejected(() -> service.linkStudentNumber(STUDENT_EMAIL, "12-3456-789"),
+                HttpStatus.CONFLICT, "already linked to another account");
+        verify(userRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void twoStudentsLinkingTheSameIdAtTheSameMomentGetTheSameClearMessage() {
+        User student = existingUser(STUDENT_EMAIL, Role.STUDENT);
+        when(userRepository.findByEmail(STUDENT_EMAIL)).thenReturn(Optional.of(student));
+        when(userRepository.existsByStudentNumber("12-3456-789")).thenReturn(false);
+        // The other student saved first, so the database's unique rule refuses this save
+        when(userRepository.saveAndFlush(student)).thenThrow(new DataIntegrityViolationException("unique student_number"));
+
+        assertRejected(() -> service.linkStudentNumber(STUDENT_EMAIL, "12-3456-789"),
+                HttpStatus.CONFLICT, "already linked to another account");
+    }
+
+    @Test
+    void aLinkedIdCannotBeChangedButSendingTheSameIdAgainIsFine() {
+        User student = existingUser(STUDENT_EMAIL, Role.STUDENT);
+        student.linkStudentNumber("12-3456-789");
+        when(userRepository.findByEmail(STUDENT_EMAIL)).thenReturn(Optional.of(student));
+
+        assertThat(service.linkStudentNumber(STUDENT_EMAIL, "12-3456-789").studentNumber()).isEqualTo("12-3456-789");
+        assertRejected(() -> service.linkStudentNumber(STUDENT_EMAIL, "98-7654-321"),
+                HttpStatus.CONFLICT, "already linked to student ID 12-3456-789");
+        verify(userRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void professorsDoNotLinkAStudentId() {
+        when(userRepository.findByEmail(PROFESSOR_EMAIL)).thenReturn(Optional.of(existingUser(PROFESSOR_EMAIL, Role.PROFESSOR)));
+
+        assertRejected(() -> service.linkStudentNumber(PROFESSOR_EMAIL, "12-3456-789"),
+                HttpStatus.FORBIDDEN, "Only students");
+    }
+
+    @Test
+    void someoneWithoutAnAccountMustEnterTheirNameFirst() {
+        when(userRepository.findByEmail(STUDENT_EMAIL)).thenReturn(Optional.empty());
+
+        assertRejected(() -> service.linkStudentNumber(STUDENT_EMAIL, "12-3456-789"),
+                HttpStatus.BAD_REQUEST, "name first");
+    }
+
     // ---------- helpers ----------
+
+    private static void assertRejected(ThrowingCallable call, HttpStatus status, String messagePart) {
+        assertThatThrownBy(call).isInstanceOfSatisfying(ResponseStatusException.class, exception -> {
+            assertThat(exception.getStatusCode()).isEqualTo(status);
+            assertThat(exception.getReason()).contains(messagePart);
+        });
+    }
 
     private User existingUser(String email, Role role) {
         return new User(email, "Test", "User", role);

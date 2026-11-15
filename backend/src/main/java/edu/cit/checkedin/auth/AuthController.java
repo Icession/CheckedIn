@@ -13,19 +13,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edu.cit.checkedin.auth.dto.CodeSentResponse;
 import edu.cit.checkedin.auth.dto.CurrentUserResponse;
+import edu.cit.checkedin.auth.dto.LinkStudentIdRequest;
 import edu.cit.checkedin.auth.dto.RequestCodeRequest;
 import edu.cit.checkedin.auth.dto.SaveNameRequest;
 import edu.cit.checkedin.auth.dto.VerifyCodeRequest;
 
 /**
  * REST endpoints for signing in and creating the account.
- * Covers FR-001 – FR-004. All rules live in LoginCodeService and AuthService; this class only
+ * Covers FR-001 – FR-006. All rules live in LoginCodeService and AuthService; this class only
  * passes requests on. (GitHub sign-in runs through Spring Security instead, see SecurityConfig.)
  *
- * POST /api/auth/code         { email }                -> emails a 6-digit code
- * POST /api/auth/code/verify  { email, code }          -> checks the code and starts the session cookie
- * GET  /api/auth/me                                    -> who is signed in (401 when nobody is)
- * POST /api/auth/name         { firstName, lastName }  -> creates the account on first sign-in
+ * POST /api/auth/code             { email }                -> emails a 6-digit code
+ * POST /api/auth/code/verify      { email, code }          -> checks the code and starts the session cookie
+ * GET  /api/auth/me                                        -> who is signed in (401 when nobody is)
+ * POST /api/auth/name             { firstName, lastName }  -> creates the account on first sign-in
+ * POST /api/auth/link-student-id  { studentNumber }        -> a student links their student ID once
  */
 @RestController
 @RequestMapping("/api/auth")
@@ -64,5 +66,11 @@ public class AuthController {
                                         Authentication authentication, HttpServletRequest httpRequest) {
         Long githubId = sessionService.getRememberedGitHubId(httpRequest);
         return authService.saveName(authentication.getName(), githubId, request);
+    }
+
+    @PostMapping("/link-student-id")
+    public CurrentUserResponse linkStudentId(@Valid @RequestBody LinkStudentIdRequest request,
+                                             Authentication authentication) {
+        return authService.linkStudentNumber(authentication.getName(), request.studentNumber());
     }
 }

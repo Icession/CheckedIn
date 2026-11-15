@@ -116,7 +116,7 @@ class AuthControllerTest {
     void savingTheNameCreatesTheAccountForTheSignedInEmail() throws Exception {
         MockHttpSession session = signInWithCode();
         when(authService.saveName(eq(EMAIL), isNull(), eq(new SaveNameRequest("Juan", "Dela Cruz"))))
-                .thenReturn(new CurrentUserResponse(EMAIL, "Juan", "Dela Cruz", Role.STUDENT, false));
+                .thenReturn(new CurrentUserResponse(EMAIL, "Juan", "Dela Cruz", Role.STUDENT, null, false, true));
 
         mockMvc.perform(post("/api/auth/name").session(session).contentType(MediaType.APPLICATION_JSON)
                         .content("{\"firstName\": \"  Juan \", \"lastName\": \"Dela   Cruz\"}"))
@@ -136,7 +136,7 @@ class AuthControllerTest {
                 .andReturn();
         MockHttpSession newSession = (MockHttpSession) signIn.getRequest().getSession(false);
         when(authService.saveName(eq(EMAIL), isNull(), eq(new SaveNameRequest("Juan", "Dela Cruz"))))
-                .thenReturn(new CurrentUserResponse(EMAIL, "Juan", "Dela Cruz", Role.STUDENT, false));
+                .thenReturn(new CurrentUserResponse(EMAIL, "Juan", "Dela Cruz", Role.STUDENT, null, false, true));
 
         // Matches only when the GitHub ID passed on is null
         mockMvc.perform(post("/api/auth/name").session(newSession).contentType(MediaType.APPLICATION_JSON)
@@ -154,6 +154,40 @@ class AuthControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value(
                         "Please use only letters, spaces, hyphens (-), apostrophes (') and periods (.) in your first name."));
+    }
+
+    // ---------- POST /api/auth/link-student-id ----------
+
+    @Test
+    void linkingAStudentIdNeedsASignedInUser() throws Exception {
+        mockMvc.perform(post("/api/auth/link-student-id").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"studentNumber\": \"12-3456-789\"}"))
+                .andExpect(status().isUnauthorized());
+        verifyNoInteractions(authService);
+    }
+
+    @Test
+    void aWronglyFormattedStudentIdGetsAPlainLanguageMessage() throws Exception {
+        MockHttpSession session = signInWithCode();
+
+        mockMvc.perform(post("/api/auth/link-student-id").session(session).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"studentNumber\": \"123456789\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(
+                        "Please enter your student ID in the format 00-0000-000, for example 12-3456-789."));
+    }
+
+    @Test
+    void aValidStudentIdIsLinkedForTheSignedInEmail() throws Exception {
+        MockHttpSession session = signInWithCode();
+        when(authService.linkStudentNumber(EMAIL, "12-3456-789"))
+                .thenReturn(new CurrentUserResponse(EMAIL, "Juan", "Dela Cruz", Role.STUDENT, "12-3456-789", false, false));
+
+        mockMvc.perform(post("/api/auth/link-student-id").session(session).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"studentNumber\": \" 12-3456-789 \"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.studentNumber").value("12-3456-789"))
+                .andExpect(jsonPath("$.needsStudentId").value(false));
     }
 
     /** Signs in with a (faked) correct code and returns the new session. */

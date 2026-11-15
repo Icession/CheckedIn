@@ -12,6 +12,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
+import org.hibernate.annotations.Check;
+
 /**
  * A person who signs in to CheckedIn with their @cit.edu email (emailed code or GitHub):
  * a professor or a student. One row in the "users" table (see the ERD in the SRS, Figure 2).
@@ -20,6 +22,10 @@ import jakarta.persistence.Table;
 @Entity
 // "user" is a reserved word in PostgreSQL, so the table is named "users"
 @Table(name = "users")
+// The database itself refuses a student ID in any other format, even one typed by hand in the
+// Supabase table editor (where typing NULL would otherwise save the text "NULL")
+@Check(name = "users_student_number_format",
+        constraints = "student_number IS NULL OR student_number ~ '^[0-9]{2}-[0-9]{4}-[0-9]{3}$'")
 public class User {
 
     @Id

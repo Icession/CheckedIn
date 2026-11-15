@@ -8,8 +8,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import edu.cit.checkedin.auth.dto.CurrentUserResponse;
 import edu.cit.checkedin.auth.dto.SaveNameRequest;
@@ -17,8 +20,9 @@ import edu.cit.checkedin.auth.dto.SaveNameRequest;
 /**
  * Turns a proven @cit.edu email into a CheckedIn account.
  * Covers FR-001 (one person may use both sign-in methods: one account, found by email),
- * FR-003 (the account is created only after the user enters their name) and
- * FR-004 (role from the professor list, checked again at every sign-in).
+ * FR-003 (the account is created only after the user enters their name),
+ * FR-004 (role from the professor list, checked again at every sign-in) and
+ * FR-005 – FR-006 (a student links one student ID, which no other account may use).
  */
 @Service
 public class AuthService {
@@ -83,6 +87,47 @@ public class AuthService {
             linkGitHubAccount(user, githubId);
         }
         return CurrentUserResponse.from(userRepository.save(user));
+    }
+
+    /**
+     * FR-005, FR-006: saves the student ID a student enters once; one ID belongs to one account.
+     * Linking the student's enrollments and the last-name check (rest of FR-006, FR-007) are added
+     * in Phase 4, when class lists exist.
+     */
+    public CurrentUserResponse linkStudentNumber(String verifiedEmail, String studentNumber) {
+        User user = userRepository.findByEmail(verifiedEmail)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please enter your name first."));
+        if (user.getRole() != Role.STUDENT) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only students link a student ID.");
+        }
+        if (user.getStudentNumber() != null) {
+            return keepLinkedStudentNumber(user, studentNumber);
+        }
+        if (userRepository.existsByStudentNumber(studentNumber)) {
+            throw studentIdAlreadyTaken();
+        }
+        user.linkStudentNumber(studentNumber);
+        try {
+            return CurrentUserResponse.from(userRepository.saveAndFlush(user));
+        } catch (DataIntegrityViolationException exception) {
+            // Someone linked the same ID at the very same moment; the database's unique rule caught it
+            throw studentIdAlreadyTaken();
+        }
+    }
+
+    // Once linked, a student cannot change their ID themselves (there is no admin page)
+    private CurrentUserResponse keepLinkedStudentNumber(User user, String studentNumber) {
+        if (user.getStudentNumber().equals(studentNumber)) {
+            // The same ID sent again (for example a double click): nothing to change
+            return CurrentUserResponse.from(user);
+        }
+        throw new ResponseStatusException(HttpStatus.CONFLICT, "Your account is already linked to student ID "
+                + user.getStudentNumber() + ". If that is wrong, please contact your professor.");
+    }
+
+    private ResponseStatusException studentIdAlreadyTaken() {
+        return new ResponseStatusException(HttpStatus.CONFLICT,
+                "This student ID is already linked to another account. If it is yours, please contact your professor.");
     }
 
     /** FR-004: Professor if the email is on the professor list in the settings, otherwise Student. */

@@ -27,3 +27,8 @@ export function getCurrentUser() {
 export function saveName(firstName, lastName) {
   return apiPost('/api/auth/name', { firstName, lastName })
 }
+
+/** A student's first sign-in: links their student ID once (FR-005). Returns the current user. */
+export function linkStudentId(studentNumber) {
+  return apiPost('/api/auth/link-student-id', { studentNumber })
+}
