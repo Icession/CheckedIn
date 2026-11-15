@@ -16,13 +16,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
  * Tests GET /api/health without a real database.
  * The DataSource is replaced with a fake (mock) so we control what the database "answers".
+ * SecurityConfig is loaded so the test uses our real rules, where /api/health is public.
  */
 @WebMvcTest(HealthController.class)
+@Import(SecurityConfig.class)
 class HealthControllerTest {
 
     @Autowired

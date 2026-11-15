@@ -1,8 +1,10 @@
+// SetupCheckPage — shows whether the backend and the database are running (Phase 0 setup check).
+// Open it at http://localhost:5173/setup.
 import { useEffect, useState } from 'react'
 import { getHealth } from '../api/healthApi.js'
 import StatusPill from '../components/StatusPill.jsx'
 
-export default function HomePage() {
+export default function SetupCheckPage() {
   const [health, setHealth] = useState(null)
   const [error, setError] = useState('')
 

@@ -3,7 +3,9 @@
 :root {
   /* Brand */
   --color-primary: #2f5597;
+  --color-primary-dark: #24447a;  /* buttons on hover */
   --color-primary-light: #dce6f2;
+  --color-on-primary: #ffffff;    /* text on primary-colored buttons */
 
   /* Text and backgrounds */
   --color-text: #1f2937;

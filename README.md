@@ -19,7 +19,7 @@ IT342 – Systems Integration and Architecture 1 · G01 · Kurt Carcueva
 - **Backend:** Java 17, Spring Boot 3.3, Maven, Spring Data JPA
 - **Database:** PostgreSQL on Supabase (free plan)
 - **Frontend:** React 19, Vite, React Router
-- **External systems:** Google Sign-In (one-click login), Brevo (sign-in codes and notification emails), Cloudinary (excuse files)
+- **External systems:** GitHub Sign-In (one-click login), Brevo (sign-in codes and notification emails), Cloudinary (excuse files)
 
 ## What you need installed
 
@@ -140,7 +140,10 @@ npm install                 # first time only
 npm run dev
 ```
 
-Open http://localhost:5173. You should see **Backend: UP** and **Database: UP**.
+Open http://localhost:5173 to sign in: enter your `@cit.edu` email, then the 6-digit code that
+arrives by email (Brevo must be set up first, see above).
+
+To check the setup, open http://localhost:5173/setup. You should see **Backend: UP** and **Database: UP**.
 
 ## Run the tests
 
@@ -166,3 +169,7 @@ cd backend
 | `Brevo rejected the email` with any other code | Read Brevo's own message in the log line just above it. New Brevo accounts sometimes need their profile completed or the account confirmed first |
 | `Could not reach Brevo` | Check your internet connection and try again |
 | The test email is in **Junk Email** | Mark it as **Not junk**. For better delivery, send from a domain you own and authenticate it in Brevo (optional) |
+| Sign-in page says "Please use your CIT-U email address." | Only `@cit.edu` addresses can sign in (FR-002) |
+| Sign-in page says "We couldn't send the code right now" | Brevo could not send the email. The backend log shows why; see the Brevo rows above |
+| Sign-in page says "You asked for 3 codes in the last 15 minutes" | Use the newest code you received, or wait 15 minutes. Only the newest code works |
+| You sign in, but after reloading the page you are signed out again | The session cookie is marked Secure. Chrome, Edge and Firefox should keep it on `http://localhost`; some browsers (such as Safari) may not. Try Chrome or Edge, or for local testing only add `SESSION_COOKIE_SECURE=false` to `backend/.env`. Never turn it off on the deployed site |

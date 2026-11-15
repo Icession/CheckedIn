@@ -4,12 +4,15 @@ import java.util.TimeZone;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 /**
  * Starting point of the CheckedIn backend.
  * Run this class (or "mvnw spring-boot:run") to start the REST API on port 8080.
  */
 @SpringBootApplication
+// Finds settings records such as LoginCodeSettings and fills them from application.properties
+@ConfigurationPropertiesScan
 public class CheckedInApplication {
 
     private static final String PHILIPPINE_TIME_ZONE = "Asia/Manila";

@@ -40,6 +40,12 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <!-- Sign-in sessions and access rules (also gives BCrypt for hashing sign-in codes) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
         <!-- PostgreSQL driver (the database runs on Supabase) -->
         <dependency>
             <groupId>org.postgresql</groupId>

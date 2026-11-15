@@ -42,7 +42,7 @@ Steps (do them one at a time):
       optional `googleSubject`, and find users by email (see ERD)
 - [x] 1d. Brevo: account + verified sender (README guide), `integration/EmailService` + `BrevoEmailService`.
       Send one test email to your @cit.edu inbox and check it doesn't land in Junk
-- [ ] 1e. Email-code sign-in (FR-001, FR-002, NFR-008): `LoginCode` entity, `LoginCodeService`,
+- [x] 1e. Email-code sign-in (FR-001, FR-002, NFR-008): `LoginCode` entity, `LoginCodeService`,
       `POST /api/auth/code` and `POST /api/auth/code/verify`, sign-in page (email, then code),
       HttpOnly session cookie for 8 hours (library: `spring-boot-starter-security`)
 - [ ] 1f. GitHub sign-in (FR-001, FR-002, NFR-008): GitHub OAuth App with client ID and secret

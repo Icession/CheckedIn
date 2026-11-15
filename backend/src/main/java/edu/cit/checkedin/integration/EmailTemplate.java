@@ -6,9 +6,22 @@ import java.util.Map;
  * Every email CheckedIn can send: its subject and its plain-text body.
  * Words in braces, like {sentAt}, are placeholders filled in when the email is sent.
  * The texts live here in the code (not in the Brevo dashboard) so they are easy to find and review.
- * Sign-in code and warning emails are added in step 1e and Phase 10.
+ * Warning emails are added in Phase 10.
  */
 public enum EmailTemplate {
+
+    // FR-001: the one-time code for signing in (step 1e)
+    LOGIN_CODE(
+            "Your CheckedIn sign-in code",
+            """
+            Your CheckedIn sign-in code is:
+
+                {code}
+
+            It works once and expires in {minutes} minutes.
+
+            If you did not try to sign in to CheckedIn, you can ignore this email.
+            """),
 
     // Setup check (step 1d): proves that emails from CheckedIn reach a @cit.edu inbox
     TEST_EMAIL(
