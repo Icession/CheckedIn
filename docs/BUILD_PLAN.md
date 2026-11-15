@@ -45,7 +45,7 @@ Steps (do them one at a time):
 - [x] 1e. Email-code sign-in (FR-001, FR-002, NFR-008): `LoginCode` entity, `LoginCodeService`,
       `POST /api/auth/code` and `POST /api/auth/code/verify`, sign-in page (email, then code),
       HttpOnly session cookie for 8 hours (library: `spring-boot-starter-security`)
-- [ ] 1f. GitHub sign-in (FR-001, FR-002, NFR-008): GitHub OAuth App with client ID and secret
+- [x] 1f. GitHub sign-in (FR-001, FR-002, NFR-008): GitHub OAuth App with client ID and secret
       (README guide), "Sign in with GitHub" button that goes to `/oauth2/authorization/github`,
       Spring Security `oauth2Login` (library: `spring-boot-starter-oauth2-client`),
       `integration/GitHubIdentityProvider` reads `/user/emails` and accepts only a verified

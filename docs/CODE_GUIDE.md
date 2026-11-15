@@ -106,7 +106,7 @@ When a feature has several pages, group them: `pages/attendance/AttendancePage.j
 | How seats are auto-arranged A–Z | `seating/SeatArrangementService.java` |
 | Sign-in page (email code and GitHub button) | `frontend/src/pages/SignInPage.jsx` |
 | How sign-in codes are made, hashed and checked | `auth/LoginCodeService.java` |
-| GitHub verified-email check | `integration/GitHubIdentityProvider.java` |
+| GitHub verified-email check | `integration/GitHubIdentityProvider.java` (reads GitHub's verified emails) and `auth/GitHubUserService.java` (requires a verified @cit.edu one) |
 | Where sign-in codes are emailed | `integration/BrevoEmailService.java` |
 | Where excuse files are uploaded | `integration/CloudinaryStorageService.java` |
 | Where emails are sent | `integration/BrevoEmailService.java` |

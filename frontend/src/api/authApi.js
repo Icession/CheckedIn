@@ -1,5 +1,9 @@
 // authApi.js — calls for signing in (Feature 1: FR-001, FR-002).
-import { apiGet, apiPost } from './apiClient.js'
+import { apiGet, apiPost, BASE_URL } from './apiClient.js'
+
+// "Sign in with GitHub" is a normal link, not a fetch: the whole page goes to the backend,
+// which sends it on to GitHub and back (Spring Security handles those steps).
+export const GITHUB_SIGN_IN_URL = `${BASE_URL}/oauth2/authorization/github`
 
 /** Emails a 6-digit sign-in code. Returns { email, expiresInMinutes }. */
 export function requestSignInCode(email) {

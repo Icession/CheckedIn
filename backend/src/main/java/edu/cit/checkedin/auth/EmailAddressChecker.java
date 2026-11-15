@@ -2,6 +2,7 @@ package edu.cit.checkedin.auth;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -36,5 +37,16 @@ public class EmailAddressChecker {
      */
     public boolean isAllowed(String normalizedEmail) {
         return allowedDomains.stream().anyMatch(domain -> normalizedEmail.endsWith("@" + domain));
+    }
+
+    /**
+     * Returns the first allowed address in the list (normalized), or nothing if none is allowed.
+     * Used for GitHub accounts, which can have several verified addresses.
+     */
+    public Optional<String> findFirstAllowed(List<String> emails) {
+        return emails.stream()
+                .map(this::normalize)
+                .filter(this::isAllowed)
+                .findFirst();
     }
 }

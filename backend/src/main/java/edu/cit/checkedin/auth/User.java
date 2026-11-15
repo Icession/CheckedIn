@@ -13,7 +13,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 /**
- * A person who signs in to CheckedIn with their @cit.edu email (emailed code or Google):
+ * A person who signs in to CheckedIn with their @cit.edu email (emailed code or GitHub):
  * a professor or a student. One row in the "users" table (see the ERD in the SRS, Figure 2).
  * Covers FR-003 (account created on first sign-in), FR-004 (role) and FR-005 (linked student ID).
  */
@@ -27,9 +27,9 @@ public class User {
     @Column(name = "user_id")
     private Long userId;
 
-    // The account ID Google gives this user. Filled only for users who have signed in with Google.
-    @Column(name = "google_subject", length = 255, unique = true)
-    private String googleSubject;
+    // The numeric account ID from GitHub. Filled only for users who have signed in with GitHub.
+    @Column(name = "github_id", unique = true)
+    private Long githubId;
 
     // Both sign-in methods end with a proven @cit.edu email, so we find users by their email
     @Column(name = "email", length = 120, nullable = false, unique = true)
@@ -93,12 +93,12 @@ public class User {
         return userId;
     }
 
-    public String getGoogleSubject() {
-        return googleSubject;
+    public Long getGithubId() {
+        return githubId;
     }
 
-    public void setGoogleSubject(String googleSubject) {
-        this.googleSubject = googleSubject;
+    public void setGithubId(Long githubId) {
+        this.githubId = githubId;
     }
 
     public String getEmail() {

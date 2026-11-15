@@ -27,6 +27,7 @@ IT342 – Systems Integration and Architecture 1 · G01 · Kurt Carcueva
 - Node.js 20 or newer (`node -v`)
 - A free Supabase account (https://supabase.com)
 - A CIT-U email address (`@cit.edu`) for signing in
+- A GitHub account (only for "Sign in with GitHub")
 - Git
 
 Maven does not need to be installed: the project includes the Maven Wrapper (`.\mvnw.cmd`).
@@ -121,6 +122,57 @@ Then open your CIT-U Outlook:
   check Junk if a code doesn't arrive (SRS 1.6).
 - **Not there after a few minutes:** see Troubleshooting below.
 
+## Set up GitHub sign-in (one time)
+
+Users can also sign in with GitHub (FR-001) if their GitHub account has their `@cit.edu`
+address added **and verified** (FR-002). For that, CheckedIn needs a GitHub **OAuth App**, which
+gives a client ID and a client secret.
+
+If a GitHub screen looks different from these steps, follow GitHub's own guide:
+[Creating an OAuth app](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app).
+
+### Step 1: Register the OAuth App
+
+1. On GitHub, click your profile picture (top right) → **Settings** → **Developer settings**
+   (bottom of the left sidebar) → **OAuth Apps** → **New OAuth App**. If it is your first app,
+   the button says **Register a new application**.
+2. Fill in:
+   - **Application name:** `CheckedIn`
+   - **Homepage URL:** `http://localhost:5173`
+   - **Authorization callback URL:** `http://localhost:5173/login/oauth2/code/github` (exactly this)
+3. Click **Register application**.
+
+### Step 2: Copy the client ID and create a client secret
+
+1. On the app's page, copy the **Client ID**.
+2. Generate a new client secret and **copy it right away**. GitHub may not show it again.
+
+### Step 3: Add them to `backend/.env`
+
+Copy the GitHub lines from `backend/.env.example` into your `backend/.env` and fill them in:
+
+```properties
+GITHUB_CLIENT_ID=the Client ID from Step 2
+GITHUB_CLIENT_SECRET=the client secret from Step 2
+```
+
+The client secret stays only in `backend/.env` (NFR-011). The browser never sees it: the backend
+itself swaps GitHub's one-time code for a token (NFR-008). Restart the backend after the change.
+
+### Step 4: Add your `@cit.edu` email on GitHub
+
+On GitHub: **Settings** → **Emails** → add your `@cit.edu` address, then click the link in the
+verification email GitHub sends you. It does not need to be your primary or public address, but it
+must be **verified**: CheckedIn never trusts an unverified address.
+
+### Step 5: Try it
+
+Open http://localhost:5173, click **Sign in with GitHub**, and approve CheckedIn on GitHub's page.
+You come back signed in with your `@cit.edu` email. Next time, GitHub skips the approval page.
+
+When the frontend is deployed (Phase 12), add its address as another callback URL
+(`https://<your-site>/login/oauth2/code/github`). GitHub allows several callback URLs per app.
+
 ## Run the project (Windows)
 
 **1. Backend**
@@ -141,7 +193,8 @@ npm run dev
 ```
 
 Open http://localhost:5173 to sign in: enter your `@cit.edu` email, then the 6-digit code that
-arrives by email (Brevo must be set up first, see above).
+arrives by email (Brevo must be set up first, see above), or click **Sign in with GitHub**
+(see "Set up GitHub sign-in").
 
 To check the setup, open http://localhost:5173/setup. You should see **Backend: UP** and **Database: UP**.
 
@@ -173,3 +226,7 @@ cd backend
 | Sign-in page says "We couldn't send the code right now" | Brevo could not send the email. The backend log shows why; see the Brevo rows above |
 | Sign-in page says "You asked for 3 codes in the last 15 minutes" | Use the newest code you received, or wait 15 minutes. Only the newest code works |
 | You sign in, but after reloading the page you are signed out again | The session cookie is marked Secure. Chrome, Edge and Firefox should keep it on `http://localhost`; some browsers (such as Safari) may not. Try Chrome or Edge, or for local testing only add `SESSION_COOKIE_SECURE=false` to `backend/.env`. Never turn it off on the deployed site |
+| GitHub says the `redirect_uri` is not associated with this application | The OAuth App's callback URL must be exactly `http://localhost:5173/login/oauth2/code/github`, and open the app at `http://localhost:5173` (not `127.0.0.1`) |
+| Clicking **Sign in with GitHub** shows a GitHub error page (often a 404) | `GITHUB_CLIENT_ID` is missing or wrong in `backend/.env` (until it is set, the backend uses a placeholder). Restart the backend after changing it |
+| After GitHub, the sign-in page says "Please use your CIT-U email address. Add your @cit.edu email…" | Your GitHub account has no **verified** `@cit.edu` address. Add it under GitHub **Settings** → **Emails** and click the link in GitHub's verification email |
+| After GitHub, the sign-in page says "GitHub sign-in did not finish" | Try again. If it keeps happening, read the backend log line that starts with `GitHub sign-in failed`; a wrong `GITHUB_CLIENT_SECRET` shows up there |

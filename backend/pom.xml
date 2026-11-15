@@ -46,6 +46,12 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
+        <!-- "Sign in with GitHub" (OAuth 2.0): redirects, state check, and code-for-token exchange -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-client</artifactId>
+        </dependency>
+
         <!-- PostgreSQL driver (the database runs on Supabase) -->
         <dependency>
             <groupId>org.postgresql</groupId>

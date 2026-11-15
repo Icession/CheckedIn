@@ -22,6 +22,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class SessionService {
 
+    // Where a GitHub sign-in keeps the GitHub account ID until step 1g saves it on the account
+    public static final String GITHUB_ID_SESSION_KEY = "checkedin.githubId";
+
     // Stores "who is signed in" inside the server-side session that the cookie points to
     private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
@@ -42,5 +45,10 @@ public class SessionService {
         SecurityContextHolder.setContext(context);
         // Spring Security does not save a sign-in made in our own code by itself, so we save it here
         securityContextRepository.saveContext(context, request, response);
+    }
+
+    /** Remembers which GitHub account was used, so step 1g can save it as the user's githubId. */
+    public void rememberGitHubId(Long githubId, HttpServletRequest request) {
+        request.getSession().setAttribute(GITHUB_ID_SESSION_KEY, githubId);
     }
 }

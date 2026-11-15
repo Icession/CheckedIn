@@ -31,4 +31,16 @@ class EmailAddressCheckerTest {
         assertThat(checker.isAllowed("juan@evil-cit.edu")).isFalse();
         assertThat(checker.isAllowed("juan@notcit.edu")).isFalse();
     }
+
+    @Test
+    void findFirstAllowedPicksTheFirstCitEduAddressInTheList() {
+        assertThat(checker.findFirstAllowed(List.of("juan@gmail.com", " Juan@CIT.edu", "juan.two@cit.edu")))
+                .contains("juan@cit.edu");
+    }
+
+    @Test
+    void findFirstAllowedFindsNothingWhenNoAddressIsCitEdu() {
+        assertThat(checker.findFirstAllowed(List.of("juan@evil-cit.edu", "123+juan@users.noreply.github.com")))
+                .isEmpty();
+    }
 }

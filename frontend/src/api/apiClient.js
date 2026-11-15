@@ -4,7 +4,7 @@
 
 // Empty in development (the Vite proxy forwards /api to the backend).
 // Set VITE_API_BASE_URL in .env when the backend runs somewhere else.
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
+export const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
 
 /** Sends a GET request and returns the JSON body. */
 export function apiGet(path) {

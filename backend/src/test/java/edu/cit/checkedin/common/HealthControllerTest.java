@@ -19,13 +19,17 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
+import edu.cit.checkedin.auth.GitHubLoginHandler;
+import edu.cit.checkedin.auth.GitHubUserService;
+import edu.cit.checkedin.auth.SessionService;
+
 /**
  * Tests GET /api/health without a real database.
  * The DataSource is replaced with a fake (mock) so we control what the database "answers".
  * SecurityConfig is loaded so the test uses our real rules, where /api/health is public.
  */
 @WebMvcTest(HealthController.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, SessionService.class, GitHubLoginHandler.class})
 class HealthControllerTest {
 
     @Autowired
@@ -33,6 +37,10 @@ class HealthControllerTest {
 
     @MockBean
     private DataSource dataSource;
+
+    // Needed by SecurityConfig; not used by the health check
+    @MockBean
+    private GitHubUserService gitHubUserService;
 
     @Test
     void returnsUpWhenDatabaseAnswers() throws Exception {

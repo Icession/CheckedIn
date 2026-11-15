@@ -27,7 +27,7 @@ import edu.cit.checkedin.common.SecurityConfig;
  * LoginCodeServiceTest tests them.
  */
 @WebMvcTest(AuthController.class)
-@Import({SecurityConfig.class, SessionService.class})
+@Import({SecurityConfig.class, SessionService.class, GitHubLoginHandler.class})
 class AuthControllerTest {
 
     @Autowired
@@ -35,6 +35,10 @@ class AuthControllerTest {
 
     @MockBean
     private LoginCodeService loginCodeService;
+
+    // Needed by SecurityConfig; GitHub sign-in itself is tested in GitHubSignInFlowTest
+    @MockBean
+    private GitHubUserService gitHubUserService;
 
     @Test
     void meSays401InPlainLanguageWhenNobodyIsSignedIn() throws Exception {
