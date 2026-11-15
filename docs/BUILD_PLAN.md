@@ -54,6 +54,8 @@ Steps (do them one at a time):
       first and last name (FR-003), role from the professor email list in settings (FR-004)
 - [ ] 1h. Student ID linking page on first sign-in (FR-005 – FR-007)
 - [ ] 1i. Professor and student dashboards (empty for now), sign out, 403 on wrong role (FR-008, FR-009)
+      Next to sign-out, a short hint: "Using a shared computer? Also sign out of GitHub."
+      (signing out of CheckedIn does not sign you out of GitHub, which would sign the next person in)
 
 Done when: you can sign in both ways with your @cit.edu email and see the correct dashboard for your role.
 
