@@ -183,8 +183,9 @@ PROFESSOR_EMAILS=maria.santos@cit.edu,jose.reyes@cit.edu
 ```
 
 - Separate addresses with commas. Capital letters and extra spaces don't matter.
-- Restart the backend after changing the list. The list is checked again at **every sign-in**,
-  so a change applies to a person the next time they sign in, without touching the database.
+- Restart the backend after changing the list (it reads `.env` only when it starts, and a restart
+  also signs everyone out). The role is checked on **every request** (FR-008), so the change
+  applies right away, without touching the database.
 
 On their first sign-in, every user (both sign-in methods) types their first and last name.
 The account is created only then (FR-003). Someone who signs in by email code and later with
@@ -247,7 +248,8 @@ cd backend
 | Clicking **Sign in with GitHub** shows a GitHub error page (often a 404) | `GITHUB_CLIENT_ID` is missing or wrong in `backend/.env` (until it is set, the backend uses a placeholder). Restart the backend after changing it |
 | After GitHub, the sign-in page says "Please use your CIT-U email address. Add your @cit.edu email…" | Your GitHub account has no **verified** `@cit.edu` address. Add it under GitHub **Settings** → **Emails** and click the link in GitHub's verification email |
 | After GitHub, the sign-in page says "GitHub sign-in did not finish" | Try again. If it keeps happening, read the backend log line that starts with `GitHub sign-in failed`; a wrong `GITHUB_CLIENT_SECRET` shows up there |
-| You expected the professor page but see "Role: Student" | Check that your address is in `PROFESSOR_EMAILS` in `backend/.env`, restart the backend, then sign in again (the role is checked at sign-in) |
+| You land on the student page but should be a professor | Check that your address is in `PROFESSOR_EMAILS` in `backend/.env`, restart the backend, then sign in again |
+| Opening `/professor` as a student (or `/student` as a professor) jumps back to your own page | That is on purpose: each role only sees its own pages, and the backend answers 403 to the other role (FR-008) |
 | The name form says only letters are allowed | Names may contain letters (ñ and accents are fine), spaces, hyphens (-), apostrophes (') and periods (.). Remove numbers and other symbols |
 | A student linked the wrong student ID | Students can't change it themselves, and there is no admin page. In the Supabase table editor, right-click that student's `student_number` cell and choose **Set to NULL** (never type `NULL`); the page asks for the ID again |
 | The table editor refuses a `student_number` with `users_student_number_format` | The database only accepts a real NULL or an ID in the format `00-0000-000` (a CHECK rule, so a typed `NULL` can't be saved as text). To empty the cell, use **Set to NULL** instead of typing |

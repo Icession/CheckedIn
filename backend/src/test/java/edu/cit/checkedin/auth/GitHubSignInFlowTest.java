@@ -42,6 +42,10 @@ class GitHubSignInFlowTest {
     @MockBean
     private AuthService authService;
 
+    // Needed by SecurityConfig's role rules; RoleAccessTest tests those rules
+    @MockBean
+    private RoleService roleService;
+
     @Test
     void theButtonSendsTheBrowserToGitHubWithAStateButNeverTheSecret() throws Exception {
         MvcResult result = mockMvc.perform(get("/oauth2/authorization/github"))

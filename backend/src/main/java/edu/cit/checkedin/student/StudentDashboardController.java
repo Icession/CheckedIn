@@ -1,0 +1,32 @@
+package edu.cit.checkedin.student;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import edu.cit.checkedin.auth.AuthService;
+import edu.cit.checkedin.student.dto.StudentDashboardResponse;
+
+/**
+ * The student's dashboard. Covers FR-008: only students may call it (the rule is in
+ * SecurityConfig; anyone else gets HTTP 403). Empty for now: Phase 9 adds the student's classes,
+ * attendance and absence hours (FR-059 – FR-063).
+ *
+ * GET /api/student/dashboard -> { firstName, lastName, studentNumber }
+ */
+@RestController
+@RequestMapping("/api/student/dashboard")
+public class StudentDashboardController {
+
+    private final AuthService authService;
+
+    public StudentDashboardController(AuthService authService) {
+        this.authService = authService;
+    }
+
+    @GetMapping
+    public StudentDashboardResponse getDashboard(Authentication authentication) {
+        return StudentDashboardResponse.from(authService.requireStudentWithId(authentication.getName()));
+    }
+}

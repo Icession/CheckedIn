@@ -52,19 +52,54 @@ class AuthServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Written messily on purpose (spaces, capitals, an empty entry), like a hand-edited .env line
-        List<String> professorList = List.of("  Maria.Santos@CIT.edu ", "");
-        service = new AuthService(userRepository, loginCodeService, new EmailAddressChecker(List.of("cit.edu")),
-                professorList, Clock.fixed(NOW.atZone(MANILA).toInstant(), MANILA));
+        // The real RoleService (RoleServiceTest tests the list rules themselves)
+        RoleService roleService = new RoleService(new EmailAddressChecker(List.of("cit.edu")), List.of(PROFESSOR_EMAIL));
+        service = new AuthService(userRepository, loginCodeService, roleService,
+                Clock.fixed(NOW.atZone(MANILA).toInstant(), MANILA));
     }
 
     // ---------- Rule 1: role from the professor list ----------
 
     @Test
-    void professorListIgnoresCapitalsSpacesAndEmptyEntries() {
+    void assignRoleUsesTheProfessorList() {
         assertThat(service.assignRole(PROFESSOR_EMAIL)).isEqualTo(Role.PROFESSOR);
         assertThat(service.assignRole(STUDENT_EMAIL)).isEqualTo(Role.STUDENT);
-        assertThat(service.assignRole("")).isEqualTo(Role.STUDENT);
+    }
+
+    @Test
+    void meShowsTheRoleFromTheListRightNowAndCorrectsTheStoredOne() {
+        // Stored as a student, but the list now says professor
+        User user = existingUser(PROFESSOR_EMAIL, Role.STUDENT);
+        when(userRepository.findByEmail(PROFESSOR_EMAIL)).thenReturn(Optional.of(user));
+
+        CurrentUserResponse result = service.getCurrentUser(PROFESSOR_EMAIL);
+
+        assertThat(result.role()).isEqualTo(Role.PROFESSOR);
+        assertThat(user.getRole()).isEqualTo(Role.PROFESSOR);
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void meDoesNotWriteToTheDatabaseWhenTheRoleIsUnchanged() {
+        when(userRepository.findByEmail(STUDENT_EMAIL)).thenReturn(Optional.of(existingUser(STUDENT_EMAIL, Role.STUDENT)));
+
+        service.getCurrentUser(STUDENT_EMAIL);
+
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void theStudentDashboardNeedsALinkedStudentId() {
+        when(userRepository.findByEmail(STUDENT_EMAIL)).thenReturn(Optional.of(existingUser(STUDENT_EMAIL, Role.STUDENT)));
+
+        assertRejected(() -> service.requireStudentWithId(STUDENT_EMAIL), HttpStatus.BAD_REQUEST, "link your student ID");
+    }
+
+    @Test
+    void theDashboardsNeedAnAccount() {
+        when(userRepository.findByEmail(STUDENT_EMAIL)).thenReturn(Optional.empty());
+
+        assertRejected(() -> service.requireAccount(STUDENT_EMAIL), HttpStatus.BAD_REQUEST, "enter your name");
     }
 
     @Test

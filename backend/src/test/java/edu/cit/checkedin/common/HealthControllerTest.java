@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import edu.cit.checkedin.auth.AuthService;
 import edu.cit.checkedin.auth.GitHubLoginHandler;
 import edu.cit.checkedin.auth.GitHubUserService;
+import edu.cit.checkedin.auth.RoleService;
 import edu.cit.checkedin.auth.SessionService;
 
 /**
@@ -45,6 +46,10 @@ class HealthControllerTest {
 
     @MockBean
     private AuthService authService;
+
+    // Needed by SecurityConfig's role rules; RoleAccessTest tests those rules
+    @MockBean
+    private RoleService roleService;
 
     @Test
     void returnsUpWhenDatabaseAnswers() throws Exception {

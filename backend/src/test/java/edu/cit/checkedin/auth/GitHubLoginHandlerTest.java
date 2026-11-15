@@ -27,7 +27,7 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 class GitHubLoginHandlerTest {
 
     private final AuthService authService = mock(AuthService.class);
-    private final GitHubLoginHandler handler = new GitHubLoginHandler(authService, new SessionService());
+    private final GitHubLoginHandler handler = new GitHubLoginHandler(authService, new SessionService("CHECKEDIN_SESSION", true));
     private final MockHttpServletRequest request = new MockHttpServletRequest();
     private final MockHttpServletResponse response = new MockHttpServletResponse();
     private final MockHttpSession sessionDuringGitHubSignIn = new MockHttpSession();

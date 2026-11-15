@@ -105,6 +105,8 @@ When a feature has several pages, group them: `pages/attendance/AttendancePage.j
 | The 3-lates / 18-hours rule | `absence/AbsenceCalculator.java` |
 | How seats are auto-arranged A–Z | `seating/SeatArrangementService.java` |
 | Sign-in page (email code and GitHub button) | `frontend/src/pages/SignInPage.jsx` |
+| Who may open which page (403 on the wrong role) | `common/SecurityConfig.java` and `auth/RoleService.java` |
+| Sign out | `auth/SessionService.java` (`POST /api/auth/sign-out` in `auth/AuthController.java`) |
 | How sign-in codes are made, hashed and checked | `auth/LoginCodeService.java` |
 | GitHub verified-email check | `integration/GitHubIdentityProvider.java` (reads GitHub's verified emails) and `auth/GitHubUserService.java` (requires a verified @cit.edu one) |
 | Where sign-in codes are emailed | `integration/BrevoEmailService.java` |

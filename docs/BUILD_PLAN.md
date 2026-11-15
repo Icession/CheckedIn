@@ -22,7 +22,7 @@ Goal: backend and frontend run and talk to each other.
 
 ---
 
-## Phase 1 — Users and sign-in (Feature 1: FR-001 – FR-009)
+## Phase 1 — Users and sign-in (Feature 1: FR-001 – FR-009) ✅
 
 Goal: professors and students sign in with an email code or GitHub and land on their own page.
 
@@ -55,7 +55,7 @@ Steps (do them one at a time):
 - [x] 1h. Student ID linking page on first sign-in (FR-005; FR-006: one ID per account).
       Linking enrollments and the last-name check (rest of FR-006, FR-007) moved to Phase 4,
       because there are no class lists yet
-- [ ] 1i. Professor and student dashboards (empty for now), sign out, 403 on wrong role (FR-008, FR-009)
+- [x] 1i. Professor and student dashboards (empty for now), sign out, 403 on wrong role (FR-008, FR-009)
       Next to sign-out, a short hint: "Using a shared computer? Also sign out of GitHub."
       (signing out of CheckedIn does not sign you out of GitHub, which would sign the next person in)
 

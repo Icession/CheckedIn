@@ -42,5 +42,9 @@ async function sendRequest(path, options) {
     error.status = response.status
     throw error
   }
+  // 204 No Content (for example after signing out): there is no JSON to read
+  if (response.status === 204) {
+    return null
+  }
   return response.json()
 }

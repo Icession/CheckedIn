@@ -50,6 +50,10 @@ class AuthControllerTest {
     @MockBean
     private GitHubUserService gitHubUserService;
 
+    // Needed by SecurityConfig's role rules; RoleAccessTest tests those rules
+    @MockBean
+    private RoleService roleService;
+
     @Test
     void meSays401InPlainLanguageWhenNobodyIsSignedIn() throws Exception {
         mockMvc.perform(get("/api/auth/me"))

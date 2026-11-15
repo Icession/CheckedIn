@@ -32,3 +32,8 @@ export function saveName(firstName, lastName) {
 export function linkStudentId(studentNumber) {
   return apiPost('/api/auth/link-student-id', { studentNumber })
 }
+
+/** Signs out of CheckedIn (FR-009): the backend ends the session and deletes the cookie. */
+export function signOut() {
+  return apiPost('/api/auth/sign-out', {})
+}

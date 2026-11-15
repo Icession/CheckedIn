@@ -2,12 +2,8 @@ package edu.cit.checkedin.auth;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,7 +17,7 @@ import edu.cit.checkedin.auth.dto.SaveNameRequest;
  * Turns a proven @cit.edu email into a CheckedIn account.
  * Covers FR-001 (one person may use both sign-in methods: one account, found by email),
  * FR-003 (the account is created only after the user enters their name),
- * FR-004 (role from the professor list, checked again at every sign-in) and
+ * FR-004 (role from the professor list; the stored role is kept in step with it) and
  * FR-005 – FR-006 (a student links one student ID, which no other account may use).
  */
 @Service
@@ -29,19 +25,14 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final LoginCodeService loginCodeService;
-    private final Set<String> professorEmails;
+    private final RoleService roleService;
     private final Clock clock;
 
     public AuthService(UserRepository userRepository, LoginCodeService loginCodeService,
-                       EmailAddressChecker emailAddressChecker,
-                       @Value("${checkedin.auth.professor-emails}") List<String> professorEmails, Clock clock) {
+                       RoleService roleService, Clock clock) {
         this.userRepository = userRepository;
         this.loginCodeService = loginCodeService;
-        // Cleaned up like every other email (lowercase, no spaces); empty entries are ignored
-        this.professorEmails = professorEmails.stream()
-                .map(emailAddressChecker::normalize)
-                .filter(email -> !email.isEmpty())
-                .collect(Collectors.toSet());
+        this.roleService = roleService;
         this.clock = clock;
     }
 
@@ -63,11 +54,38 @@ public class AuthService {
         return recordSignIn(verifiedEmail, githubId);
     }
 
-    /** Who is signed in, for GET /api/auth/me. */
+    /**
+     * Who is signed in, for GET /api/auth/me. The role comes from the professor list right now
+     * (FR-008); if it differs from the stored one, the stored role is corrected.
+     */
     public CurrentUserResponse getCurrentUser(String verifiedEmail) {
+        Optional<User> existingUser = userRepository.findByEmail(verifiedEmail);
+        if (existingUser.isEmpty()) {
+            return CurrentUserResponse.withoutAccount(verifiedEmail);
+        }
+        User user = existingUser.get();
+        Role currentRole = assignRole(verifiedEmail);
+        if (user.getRole() != currentRole) {
+            user.setRole(currentRole);
+            userRepository.save(user);
+        }
+        return CurrentUserResponse.from(user);
+    }
+
+    /** The signed-in person's account, for pages that need one (for example the dashboards). */
+    public User requireAccount(String verifiedEmail) {
         return userRepository.findByEmail(verifiedEmail)
-                .map(CurrentUserResponse::from)
-                .orElseGet(() -> CurrentUserResponse.withoutAccount(verifiedEmail));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Please finish signing in first: enter your name."));
+    }
+
+    /** FR-005: student pages need a linked student ID, even if someone types their address directly. */
+    public User requireStudentWithId(String verifiedEmail) {
+        User student = requireAccount(verifiedEmail);
+        if (student.getStudentNumber() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please link your student ID first.");
+        }
+        return student;
     }
 
     /**
@@ -97,7 +115,8 @@ public class AuthService {
     public CurrentUserResponse linkStudentNumber(String verifiedEmail, String studentNumber) {
         User user = userRepository.findByEmail(verifiedEmail)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please enter your name first."));
-        if (user.getRole() != Role.STUDENT) {
+        // The professor list right now decides, like every other role check (FR-008)
+        if (assignRole(verifiedEmail) != Role.STUDENT) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only students link a student ID.");
         }
         if (user.getStudentNumber() != null) {
@@ -132,7 +151,7 @@ public class AuthService {
 
     /** FR-004: Professor if the email is on the professor list in the settings, otherwise Student. */
     public Role assignRole(String verifiedEmail) {
-        return professorEmails.contains(verifiedEmail) ? Role.PROFESSOR : Role.STUDENT;
+        return roleService.roleFor(verifiedEmail);
     }
 
     // For an existing account: check the role again (the professor list may have changed), note the

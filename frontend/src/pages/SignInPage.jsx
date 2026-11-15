@@ -1,8 +1,8 @@
 // SignInPage — the first page of CheckedIn. Sign in with a code sent to your CIT-U email,
 // or with GitHub. On the first sign-in, enter your name; students also link their student ID.
-// Covers FR-001 – FR-005. The dashboards come in step 1i.
+// Then it opens the dashboard for the user's role. Covers FR-001 – FR-005 and FR-008.
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Navigate, useSearchParams } from 'react-router-dom'
 import { getCurrentUser } from '../api/authApi.js'
 import SendCodeForm from '../components/SendCodeForm.jsx'
 import VerifyCodeForm from '../components/VerifyCodeForm.jsx'
@@ -10,7 +10,8 @@ import GitHubSignInButton from '../components/GitHubSignInButton.jsx'
 import NameForm from '../components/NameForm.jsx'
 import StudentIdForm from '../components/StudentIdForm.jsx'
 
-const ROLE_LABELS = { PROFESSOR: 'Professor', STUDENT: 'Student' }
+// FR-008: professors only see professor pages, students only student pages
+const DASHBOARD_PATHS = { PROFESSOR: '/professor', STUDENT: '/student' }
 
 // When GitHub sign-in fails, the backend sends the user back here with ?signInError=<code>
 const SIGN_IN_ERROR_MESSAGES = {
@@ -53,23 +54,9 @@ export default function SignInPage() {
           <StudentIdForm onLinked={setCurrentUser} />
         )}
 
-        {/* Temporary: step 1i replaces this card with the professor and student dashboards */}
+        {/* Sign-in finished: open the dashboard for the user's role */}
         {isSignedIn && !currentUser.needsName && !currentUser.needsStudentId && (
-          <div>
-            <h2>Welcome, {currentUser.firstName}!</h2>
-            <p>
-              Signed in as <strong>{currentUser.firstName} {currentUser.lastName}</strong> (
-              {currentUser.email}).
-            </p>
-            <p>
-              Role: <strong>{ROLE_LABELS[currentUser.role]}</strong>
-            </p>
-            {currentUser.studentNumber && (
-              <p>
-                Student ID: <strong>{currentUser.studentNumber}</strong>
-              </p>
-            )}
-          </div>
+          <Navigate to={DASHBOARD_PATHS[currentUser.role]} replace />
         )}
 
         {!isChecking && !currentUser && !codeSentTo && (

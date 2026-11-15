@@ -65,6 +65,31 @@ h2 { font-size: 1.1rem; }
 }
 .button-link:disabled { color: var(--color-text-muted); cursor: not-allowed; }
 
+/* A quieter, outlined button, for actions like "Sign out" */
+.button-secondary {
+  padding: 8px 16px;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.button-secondary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ---------- Dashboards ---------- */
+.dashboard-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space);
+  margin-bottom: var(--space);
+}
+.sign-out { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.sign-out p { margin: 0; }
+
 .button-github {
   display: block;
   padding: 12px 20px;
