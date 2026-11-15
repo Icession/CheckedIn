@@ -39,6 +39,9 @@ class GitHubSignInFlowTest {
     @MockBean
     private GitHubUserService gitHubUserService;
 
+    @MockBean
+    private AuthService authService;
+
     @Test
     void theButtonSendsTheBrowserToGitHubWithAStateButNeverTheSecret() throws Exception {
         MvcResult result = mockMvc.perform(get("/oauth2/authorization/github"))

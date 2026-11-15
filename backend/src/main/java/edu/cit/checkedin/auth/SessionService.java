@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class SessionService {
 
-    // Where a GitHub sign-in keeps the GitHub account ID until step 1g saves it on the account
+    // Where a GitHub sign-in keeps the GitHub account ID until the account is created (name form)
     public static final String GITHUB_ID_SESSION_KEY = "checkedin.githubId";
 
     // Stores "who is signed in" inside the server-side session that the cookie points to
@@ -47,8 +47,17 @@ public class SessionService {
         securityContextRepository.saveContext(context, request, response);
     }
 
-    /** Remembers which GitHub account was used, so step 1g can save it as the user's githubId. */
+    /** Remembers which GitHub account was used, so it can be saved when the account is created. */
     public void rememberGitHubId(Long githubId, HttpServletRequest request) {
         request.getSession().setAttribute(GITHUB_ID_SESSION_KEY, githubId);
+    }
+
+    /**
+     * The GitHub ID remembered at sign-in, or null after an email-code sign-in. (Every sign-in
+     * starts a fresh session, so an email-code session never holds an old GitHub ID.)
+     */
+    public Long getRememberedGitHubId(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        return (session == null) ? null : (Long) session.getAttribute(GITHUB_ID_SESSION_KEY);
     }
 }

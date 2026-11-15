@@ -14,6 +14,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // FR-003: after an email-code or GitHub sign-in, look up the user by their proven email
     Optional<User> findByEmail(String email);
 
+    // FR-001: which account (if any) already uses this GitHub account
+    Optional<User> findByGithubId(Long githubId);
+
     // FR-006: reject a student ID that is already linked to another account
     boolean existsByStudentNumber(String studentNumber);
 }

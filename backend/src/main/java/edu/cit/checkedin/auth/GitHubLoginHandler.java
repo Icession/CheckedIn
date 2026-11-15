@@ -4,11 +4,13 @@ import java.io.IOException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -17,7 +19,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * What happens after "Sign in with GitHub" finishes (FR-001, FR-002).
- * Success: starts the same 8-hour session as the email-code sign-in (NFR-009) and opens the app.
+ * Success: updates an existing account (role, GitHub ID), then starts the same 8-hour session as
+ * the email-code sign-in (NFR-009) and opens the app.
  * Failure: goes back to the sign-in page with a short error code that the page explains.
  */
 @Component
@@ -25,9 +28,11 @@ public class GitHubLoginHandler implements AuthenticationSuccessHandler, Authent
 
     private static final Logger log = LoggerFactory.getLogger(GitHubLoginHandler.class);
 
+    private final AuthService authService;
     private final SessionService sessionService;
 
-    public GitHubLoginHandler(SessionService sessionService) {
+    public GitHubLoginHandler(AuthService authService, SessionService sessionService) {
+        this.authService = authService;
         this.sessionService = sessionService;
     }
 
@@ -37,6 +42,17 @@ public class GitHubLoginHandler implements AuthenticationSuccessHandler, Authent
         OAuth2User githubUser = (OAuth2User) authentication.getPrincipal();
         String verifiedEmail = githubUser.getAttribute(GitHubUserService.EMAIL_ATTRIBUTE);
         Long githubId = githubUser.getAttribute(GitHubUserService.GITHUB_ID_ATTRIBUTE);
+
+        try {
+            // Existing account: check the role again and save the GitHub ID on it (one person, one account)
+            authService.signInWithGitHub(githubId, verifiedEmail);
+        } catch (RuntimeException exception) {
+            log.error("Could not record the GitHub sign-in", exception);
+            // Spring already counted this as signed in, so undo that before going back
+            signOutCompletely(request);
+            response.sendRedirect("/?signInError=" + GitHubUserService.GITHUB_FAILED);
+            return;
+        }
 
         // A fresh session that holds only the verified email, exactly like the email-code sign-in.
         // This also throws away the GitHub access token: we needed it only once, to read the emails.
@@ -51,6 +67,14 @@ public class GitHubLoginHandler implements AuthenticationSuccessHandler, Authent
         String errorCode = errorCodeFor(exception);
         log.warn("GitHub sign-in failed ({}): {}", errorCode, exception.getMessage());
         response.sendRedirect("/?signInError=" + errorCode);
+    }
+
+    private void signOutCompletely(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        SecurityContextHolder.clearContext();
     }
 
     // Only fixed codes go into the address, never the exception's own text

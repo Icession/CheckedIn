@@ -50,7 +50,7 @@ Steps (do them one at a time):
       Spring Security `oauth2Login` (library: `spring-boot-starter-oauth2-client`),
       `integration/GitHubIdentityProvider` reads `/user/emails` and accepts only a verified
       @cit.edu email; `User.googleSubject` becomes `githubId` (Long). Same session cookie as 1e
-- [ ] 1g. Create the account on first sign-in after EVERY user (both methods) enters their
+- [x] 1g. Create the account on first sign-in after EVERY user (both methods) enters their
       first and last name (FR-003), role from the professor email list in settings (FR-004)
 - [ ] 1h. Student ID linking page on first sign-in (FR-005 – FR-007)
 - [ ] 1i. Professor and student dashboards (empty for now), sign out, 403 on wrong role (FR-008, FR-009)

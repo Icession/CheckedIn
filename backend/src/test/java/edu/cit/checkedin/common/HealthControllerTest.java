@@ -19,6 +19,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
+import edu.cit.checkedin.auth.AuthService;
 import edu.cit.checkedin.auth.GitHubLoginHandler;
 import edu.cit.checkedin.auth.GitHubUserService;
 import edu.cit.checkedin.auth.SessionService;
@@ -41,6 +42,9 @@ class HealthControllerTest {
     // Needed by SecurityConfig; not used by the health check
     @MockBean
     private GitHubUserService gitHubUserService;
+
+    @MockBean
+    private AuthService authService;
 
     @Test
     void returnsUpWhenDatabaseAnswers() throws Exception {

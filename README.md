@@ -173,6 +173,23 @@ You come back signed in with your `@cit.edu` email. Next time, GitHub skips the 
 When the frontend is deployed (Phase 12), add its address as another callback URL
 (`https://<your-site>/login/oauth2/code/github`). GitHub allows several callback URLs per app.
 
+## Choose the professors (FR-004)
+
+There is no admin page. Professors are the email addresses listed in `backend/.env`;
+everyone else who signs in is a student:
+
+```properties
+PROFESSOR_EMAILS=maria.santos@cit.edu,jose.reyes@cit.edu
+```
+
+- Separate addresses with commas. Capital letters and extra spaces don't matter.
+- Restart the backend after changing the list. The list is checked again at **every sign-in**,
+  so a change applies to a person the next time they sign in, without touching the database.
+
+On their first sign-in, every user (both sign-in methods) types their first and last name.
+The account is created only then (FR-003). Someone who signs in by email code and later with
+GitHub keeps one account, because the same `@cit.edu` address identifies them.
+
 ## Run the project (Windows)
 
 **1. Backend**
@@ -230,3 +247,5 @@ cd backend
 | Clicking **Sign in with GitHub** shows a GitHub error page (often a 404) | `GITHUB_CLIENT_ID` is missing or wrong in `backend/.env` (until it is set, the backend uses a placeholder). Restart the backend after changing it |
 | After GitHub, the sign-in page says "Please use your CIT-U email address. Add your @cit.edu email…" | Your GitHub account has no **verified** `@cit.edu` address. Add it under GitHub **Settings** → **Emails** and click the link in GitHub's verification email |
 | After GitHub, the sign-in page says "GitHub sign-in did not finish" | Try again. If it keeps happening, read the backend log line that starts with `GitHub sign-in failed`; a wrong `GITHUB_CLIENT_SECRET` shows up there |
+| You expected the professor page but see "Role: Student" | Check that your address is in `PROFESSOR_EMAILS` in `backend/.env`, restart the backend, then sign in again (the role is checked at sign-in) |
+| The name form says only letters are allowed | Names may contain letters (ñ and accents are fine), spaces, hyphens (-), apostrophes (') and periods (.). Remove numbers and other symbols |

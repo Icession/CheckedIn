@@ -1,11 +1,15 @@
 // SignInPage — the first page of CheckedIn. Sign in with a code sent to your CIT-U email,
-// or with GitHub. Covers FR-001 and FR-002. The name form comes in step 1g; the dashboards in 1i.
+// or with GitHub; on the first sign-in, enter your name. Covers FR-001 – FR-004.
+// The dashboards come in step 1i.
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { getCurrentUser } from '../api/authApi.js'
 import SendCodeForm from '../components/SendCodeForm.jsx'
 import VerifyCodeForm from '../components/VerifyCodeForm.jsx'
 import GitHubSignInButton from '../components/GitHubSignInButton.jsx'
+import NameForm from '../components/NameForm.jsx'
+
+const ROLE_LABELS = { PROFESSOR: 'Professor', STUDENT: 'Student' }
 
 // When GitHub sign-in fails, the backend sends the user back here with ?signInError=<code>
 const SIGN_IN_ERROR_MESSAGES = {
@@ -39,12 +43,21 @@ export default function SignInPage() {
       <section className="card sign-in-card">
         {isChecking && <p className="muted">Loading…</p>}
 
-        {/* Temporary: steps 1g and 1i replace this with the name form and the dashboards */}
-        {!isChecking && currentUser && (
+        {/* First sign-in: no account yet until the name is saved (FR-003) */}
+        {!isChecking && currentUser && currentUser.needsName && (
+          <NameForm email={currentUser.email} onSaved={setCurrentUser} />
+        )}
+
+        {/* Temporary: step 1i replaces this card with the professor and student dashboards */}
+        {!isChecking && currentUser && !currentUser.needsName && (
           <div>
-            <h2>You are signed in</h2>
+            <h2>Welcome, {currentUser.firstName}!</h2>
             <p>
-              Signed in as <strong>{currentUser.email}</strong>.
+              Signed in as <strong>{currentUser.firstName} {currentUser.lastName}</strong> (
+              {currentUser.email}).
+            </p>
+            <p>
+              Role: <strong>{ROLE_LABELS[currentUser.role]}</strong>
             </p>
           </div>
         )}

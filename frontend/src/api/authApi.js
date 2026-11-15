@@ -1,4 +1,4 @@
-// authApi.js — calls for signing in (Feature 1: FR-001, FR-002).
+// authApi.js — calls for signing in and creating the account (Feature 1: FR-001 – FR-004).
 import { apiGet, apiPost, BASE_URL } from './apiClient.js'
 
 // "Sign in with GitHub" is a normal link, not a fetch: the whole page goes to the backend,
@@ -10,12 +10,20 @@ export function requestSignInCode(email) {
   return apiPost('/api/auth/code', { email })
 }
 
-/** Checks the code; on success the backend starts the session cookie. Returns { email }. */
+/**
+ * Checks the code; on success the backend starts the session cookie.
+ * Returns the current user: { email, firstName, lastName, role, needsName }.
+ */
 export function verifySignInCode(email, code) {
   return apiPost('/api/auth/code/verify', { email, code })
 }
 
-/** Who is signed in: { email }. Throws (status 401) when nobody is. */
+/** Who is signed in: { email, firstName, lastName, role, needsName }. Throws (status 401) when nobody is. */
 export function getCurrentUser() {
   return apiGet('/api/auth/me')
+}
+
+/** First sign-in: saves the name, which creates the account (FR-003). Returns the current user. */
+export function saveName(firstName, lastName) {
+  return apiPost('/api/auth/name', { firstName, lastName })
 }
