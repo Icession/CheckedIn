@@ -24,11 +24,15 @@ Goal: backend and frontend run and talk to each other.
 
 ## Phase 1 — Users and sign-in (Feature 1: FR-001 – FR-009)
 
-Goal: professors and students sign in with an email code or Google and land on their own page.
+Goal: professors and students sign in with an email code or GitHub and land on their own page.
 
 > **Change of plan (Nov 9):** Microsoft sign-in was dropped because CIT-U's Microsoft tenant
 > requires IT admin approval ("Need admin approval"). Sign-in is now an emailed code (Brevo) or
 > Google. The SRS was updated to match; FR numbers did not change.
+>
+> **Change of plan (Nov 12, SRS v1.2):** Google was replaced by **GitHub** on the instructor's
+> advice (a Google app in testing mode only allows listed test users). Everyone now enters their
+> name on first sign-in. FR numbers did not change.
 
 Steps (do them one at a time):
 - [x] 1a. `auth/User` entity, `Role` enum, `UserRepository`, `GlobalExceptionHandler`
@@ -41,14 +45,13 @@ Steps (do them one at a time):
 - [ ] 1e. Email-code sign-in (FR-001, FR-002, NFR-008): `LoginCode` entity, `LoginCodeService`,
       `POST /api/auth/code` and `POST /api/auth/code/verify`, sign-in page (email, then code),
       HttpOnly session cookie for 8 hours (library: `spring-boot-starter-security`)
-- [ ] 1f. Google sign-in (FR-001, FR-002): Google Cloud OAuth client ID (README guide),
-      "Sign in with Google" button (Google Identity Services script), `POST /api/auth/google`,
-      backend verifies the ID token with Google's public keys
-      (library: `spring-boot-starter-oauth2-resource-server`), `integration/GoogleIdentityProvider`
-- [ ] 1g. Create the account on first sign-in, ask email-code users for their name (FR-003),
-      and show the same name form to Google users when Google doesn't send both
-      `given_name` and `family_name`,
-      role from the professor email list in settings (FR-004)
+- [ ] 1f. GitHub sign-in (FR-001, FR-002, NFR-008): GitHub OAuth App with client ID and secret
+      (README guide), "Sign in with GitHub" button that goes to `/oauth2/authorization/github`,
+      Spring Security `oauth2Login` (library: `spring-boot-starter-oauth2-client`),
+      `integration/GitHubIdentityProvider` reads `/user/emails` and accepts only a verified
+      @cit.edu email; `User.googleSubject` becomes `githubId` (Long). Same session cookie as 1e
+- [ ] 1g. Create the account on first sign-in after EVERY user (both methods) enters their
+      first and last name (FR-003), role from the professor email list in settings (FR-004)
 - [ ] 1h. Student ID linking page on first sign-in (FR-005 – FR-007)
 - [ ] 1i. Professor and student dashboards (empty for now), sign out, 403 on wrong role (FR-008, FR-009)
 

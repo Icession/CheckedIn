@@ -21,7 +21,7 @@ attendance by tapping seats. Students see their own attendance and absence hours
 | Backend | Java 17, Spring Boot 3.3.4, Maven (use the wrapper: `.\mvnw.cmd` in PowerShell) |
 | Database | PostgreSQL on Supabase (free plan), Spring Data JPA (Hibernate). Supabase is used ONLY as a database: no Supabase Auth, Storage, or client libraries |
 | Frontend | React 19 + Vite, JavaScript (not TypeScript), React Router 7, plain CSS |
-| External systems | Google Sign-In (one-click login), Brevo (sign-in codes and notification emails), Cloudinary (excuse files) |
+| External systems | GitHub Sign-In (one-click login), Brevo (sign-in codes and notification emails), Cloudinary (excuse files) |
 
 Do NOT add: Lombok, TypeScript, Tailwind, Redux, Axios, or any new library
 unless I say yes first. If a new library is truly needed, explain why and ask.
@@ -32,8 +32,13 @@ unless I say yes first. If a new library is truly needed, explain why and ask.
   1. Email code: user enters an @cit.edu email, Brevo sends a 6-digit code. Codes are saved only
      as a hash, expire after 10 minutes, allow 5 wrong tries, work once, and an email can request
      at most 3 codes every 15 minutes (NFR-008).
-  2. Google: accept the Google ID token only if the signature, issuer, audience and expiry are
-     valid, `email_verified` is true, and the email ends in @cit.edu.
+  2. GitHub (OAuth App, handled by Spring Security `oauth2Login`): the code-for-token exchange
+     happens only on the server (client secret never reaches the browser), the OAuth `state` is
+     checked, and the account is accepted only if GitHub's email list (`/user/emails`, scope
+     `user:email`) has a VERIFIED address ending in @cit.edu. That email identifies the user;
+     the numeric GitHub ID is saved as `githubId`.
+  On first sign-in EVERY user (both methods) enters first and last name before the account row
+  is saved (FR-003).
   Allowed email domain(s) and the professor email list live in `application.properties` / `.env`.
 - Student ID format: `00-0000-000` (regex `^\d{2}-\d{4}-\d{3}$`).
 - Attendance statuses and colors: PRESENT = green (P), LATE = yellow (L),
