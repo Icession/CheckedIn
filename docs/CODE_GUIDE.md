@@ -78,6 +78,7 @@ All React code is under `frontend/src/`.
 | `pages/` | One file per screen, e.g. `AttendancePage.jsx` |
 | `components/` | Small reusable pieces, e.g. `StatusPill.jsx`, `SeatCell.jsx` |
 | `api/` | Every call that leaves the browser: to the backend (one file per feature, e.g. `sectionApi.js`) (GitHub sign-in is a normal link to the backend, `/oauth2/authorization/github`) |
+| `utils/` | Small shared helpers, e.g. `format.js` (labels for codes like `IN_PERSON`, times as "6:00 PM") |
 | `styles/theme.css` | All colors and sizes, including attendance status colors |
 | `styles/global.css` | Shared basic styles |
 
@@ -103,6 +104,7 @@ When a feature has several pages, group them: `pages/attendance/AttendancePage.j
 | I want to find... | Look in |
 |---|---|
 | The 3-lates / 18-hours rule | `absence/AbsenceCalculator.java` |
+| The session overlap and time rules (FR-013) | `section/SessionScheduleChecker.java` |
 | How seats are auto-arranged A–Z | `seating/SeatArrangementService.java` |
 | Sign-in page (email code and GitHub button) | `frontend/src/pages/SignInPage.jsx` |
 | Who may open which page (403 on the wrong role) | `common/SecurityConfig.java` and `auth/RoleService.java` |

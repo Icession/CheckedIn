@@ -3,34 +3,37 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getStudentDashboard } from '../api/studentApi.js'
-import SignOutButton from '../components/SignOutButton.jsx'
+import PageHeader from '../components/PageHeader.jsx'
+
+// Signed out (401), not a student (403), or sign-in not finished (400, e.g. no student ID yet):
+// the sign-in page sends everyone to the right place. Any other error is shown, so the page
+// can't bounce back and forth.
+const SEND_TO_SIGN_IN = [400, 401, 403]
 
 export default function StudentDashboardPage() {
   const navigate = useNavigate()
   const [dashboard, setDashboard] = useState(null)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     getStudentDashboard()
       .then(setDashboard)
-      // Signed out, not a student (403), or sign-in not finished: the sign-in page sends
-      // everyone to the right place
-      .catch(() => navigate('/', { replace: true }))
+      .catch((loadError) =>
+        SEND_TO_SIGN_IN.includes(loadError.status) ? navigate('/', { replace: true }) : setError(loadError.message),
+      )
   }, [navigate])
 
   if (!dashboard) {
     return (
       <main className="page page--center">
-        <p className="muted">Loading…</p>
+        {error ? <p className="error-text">{error}</p> : <p className="muted">Loading…</p>}
       </main>
     )
   }
 
   return (
     <main className="page">
-      <header className="dashboard-header">
-        <h1 className="brand">CheckedIn</h1>
-        <SignOutButton />
-      </header>
+      <PageHeader />
       <section className="card">
         <h2>Welcome, {dashboard.firstName}!</h2>
         <p>

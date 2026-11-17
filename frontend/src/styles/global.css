@@ -31,13 +31,24 @@ h2 { font-size: 1.1rem; }
 .form { display: flex; flex-direction: column; gap: 10px; }
 .form p { margin: 0; }
 .form label { font-weight: 600; }
-.form input {
+.form input,
+.form select {
   padding: 10px 12px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
+  background: var(--color-surface);
   font: inherit;
 }
-.form input:focus { outline: 2px solid var(--color-primary); outline-offset: 1px; }
+.form input:focus,
+.form select:focus { outline: 2px solid var(--color-primary); outline-offset: 1px; }
+.form h3 { margin: var(--space) 0 0; }
+
+/* Two fields side by side on wider screens, one under the other on phones */
+.form-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+@media (min-width: 600px) {
+  .form-grid { grid-template-columns: 1fr 1fr; }
+}
+.field { display: flex; flex-direction: column; gap: 4px; }
 .code-input { font-size: 1.4rem; letter-spacing: 0.4em; text-align: center; }
 
 .button-primary {
@@ -89,6 +100,40 @@ h2 { font-size: 1.1rem; }
 }
 .sign-out { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
 .sign-out p { margin: 0; }
+
+/* Cards on a signed-in page, one under the other */
+.page > .card { margin-bottom: var(--space); }
+.narrow-card { max-width: 520px; }
+.card-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.back-link { display: inline-block; margin-bottom: var(--space); color: var(--color-primary); }
+a.button-primary,
+a.button-secondary { display: inline-block; text-decoration: none; }
+
+/* Lists of sections and sessions */
+.item-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.item-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: inherit;
+  text-decoration: none;
+}
+a.item-row:hover { border-color: var(--color-primary); background: var(--color-primary-light); }
+.button-link--danger { color: var(--status-absent); }
+
+/* A short note, for example "This section is archived" */
+.notice-banner { padding: 8px 12px; border-radius: var(--radius); background: var(--color-primary-light); }
 
 .button-github {
   display: block;

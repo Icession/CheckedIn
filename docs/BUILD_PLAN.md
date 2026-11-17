@@ -65,13 +65,13 @@ Ask Claude Code: *"Start Phase 1, step 1c from docs/BUILD_PLAN.md."*
 
 ---
 
-## Phase 2 — Sections and sessions (Feature 2: FR-010 – FR-016)
+## Phase 2 — Sections and sessions (Feature 2: FR-010 – FR-016) ✅
 
-- [ ] `CourseSection` and `ClassSession` entities, enums `SessionType`, `DeliveryMode`, `Semester`
-- [ ] Create, edit, archive sections; add weekly sessions
-- [ ] Reject end time before start time and overlapping sessions (FR-013)
-- [ ] Session hours computed from start/end time (FR-014)
-- [ ] Professor dashboard shows today's sessions in time order (FR-016)
+- [x] `CourseSection` and `ClassSession` entities, enums `SessionType`, `DeliveryMode`, `Semester`
+- [x] Create, edit, archive sections; add weekly sessions
+- [x] Reject end time before start time and overlapping sessions (FR-013)
+- [x] Session hours computed from start/end time (FR-014)
+- [x] Professor dashboard shows today's sessions in time order (FR-016)
 
 Done when: a professor can create IT342 G01 with a Thursday lecture and a Thursday lab.
 

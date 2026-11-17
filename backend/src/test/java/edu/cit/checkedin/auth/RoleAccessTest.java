@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.DayOfWeek;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,8 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import edu.cit.checkedin.common.SecurityConfig;
 import edu.cit.checkedin.section.ProfessorDashboardController;
+import edu.cit.checkedin.section.ProfessorDashboardService;
+import edu.cit.checkedin.section.dto.ProfessorDashboardResponse;
 import edu.cit.checkedin.student.StudentDashboardController;
 
 /**
@@ -51,6 +54,8 @@ class RoleAccessTest {
     private LoginCodeService loginCodeService;
     @MockBean
     private GitHubUserService gitHubUserService;
+    @MockBean
+    private ProfessorDashboardService professorDashboardService;
 
     @Test
     void signedOutPeopleGet401OnBothDashboards() throws Exception {
@@ -61,7 +66,7 @@ class RoleAccessTest {
     @Test
     void aProfessorOpensTheProfessorDashboardButGets403OnTheStudentOne() throws Exception {
         when(roleService.roleFor(PROFESSOR)).thenReturn(Role.PROFESSOR);
-        when(authService.requireAccount(PROFESSOR)).thenReturn(new User(PROFESSOR, "Maria", "Santos", Role.PROFESSOR));
+        when(professorDashboardService.getDashboard(PROFESSOR)).thenReturn(mariasDashboard());
         MockHttpSession session = signedInAs(PROFESSOR);
 
         mockMvc.perform(get("/api/professor/dashboard").session(session))
@@ -90,7 +95,7 @@ class RoleAccessTest {
 
     @Test
     void someoneTakenOffTheProfessorListLosesAccessOnTheVeryNextRequest() throws Exception {
-        when(authService.requireAccount(PROFESSOR)).thenReturn(new User(PROFESSOR, "Maria", "Santos", Role.PROFESSOR));
+        when(professorDashboardService.getDashboard(PROFESSOR)).thenReturn(mariasDashboard());
         // First request: on the list. Second request: no longer on the list.
         when(roleService.roleFor(PROFESSOR)).thenReturn(Role.PROFESSOR, Role.STUDENT);
         MockHttpSession sameSession = signedInAs(PROFESSOR);
@@ -119,6 +124,10 @@ class RoleAccessTest {
     @Test
     void signingOutWhenAlreadySignedOutIsHarmless() throws Exception {
         mockMvc.perform(post("/api/auth/sign-out")).andExpect(status().isNoContent());
+    }
+
+    private ProfessorDashboardResponse mariasDashboard() {
+        return new ProfessorDashboardResponse("Maria", "Santos", DayOfWeek.THURSDAY, List.of(), List.of());
     }
 
     /** A session in which the given email is signed in, as SessionService.startSession leaves it. */

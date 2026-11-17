@@ -20,6 +20,20 @@ export function apiPost(path, body) {
   })
 }
 
+/** Sends a PUT request (replace/edit) with a JSON body and returns the JSON answer. */
+export function apiPut(path, body) {
+  return sendRequest(path, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+}
+
+/** Sends a DELETE request. Returns null (the backend answers 204 No Content). */
+export function apiDelete(path) {
+  return sendRequest(path, { method: 'DELETE' })
+}
+
 /**
  * Sends the request and returns the JSON answer.
  * When something goes wrong it throws an Error whose message can be shown to the user as-is.
