@@ -1,0 +1,115 @@
+@startuml
+!include cls_style.iuml
+skinparam nodesep 22
+skinparam ranksep 60
+
+package "Controllers (REST API)" #FAFAFA {
+  class AuthController {
+    + requestCode(request)
+    + signInWithCode(request)
+    + saveName(request)
+    + linkStudentId(request)
+    + signOut()
+  }
+  class GitHubLoginHandler {
+    + onAuthenticationSuccess(...)
+    + onAuthenticationFailure(...)
+  }
+  class SectionController {
+    + listSections(archived)
+    + createSection(request)
+    + updateSection(sectionId, request)
+    + archiveSection(sectionId)
+    + addSession(sectionId, request)
+    + removeSession(sectionId, sessionId)
+  }
+  class ProfessorDashboardController {
+    + getDashboard()
+  }
+  class StudentDashboardController {
+    + getDashboard()
+  }
+}
+
+package "Services" #FAFAFA {
+  class AuthService {
+    + signInWithCode(email, code)
+    + signInWithGitHub(githubId, email)
+    + saveName(email, githubId, request)
+    + linkStudentNumber(email, number)
+    + assignRole(email) : Role
+  }
+  class LoginCodeService {
+    + sendCode(email)
+    + checkCode(email, code) : String
+  }
+  class GitHubUserService {
+    + loadUser(userRequest) : OAuth2User
+  }
+  class SessionService {
+    + startSession(email, request, response)
+    + endSession(request, response)
+    + rememberGitHubId(githubId, request)
+  }
+  class RoleService {
+    + roleFor(email) : Role
+  }
+  class EmailAddressChecker {
+    + normalize(email) : String
+    + isAllowed(email) : boolean
+    + findFirstAllowed(emails)
+  }
+  class SectionService {
+    + createSection(email, request)
+    + updateSection(email, sectionId, request)
+    + archiveSection(email, sectionId)
+    + findOwnedSection(email, sectionId)
+  }
+  class ClassSessionService {
+    + addSession(email, sectionId, request)
+    + removeSession(email, sectionId, sessionId)
+  }
+  class SessionScheduleChecker {
+    + checkTimes(session)
+    + checkNoOverlap(session, sections, term)
+    + describe(session) : String
+  }
+  class ProfessorDashboardService {
+    + getDashboard(email)
+  }
+}
+
+package "External Integration" #FAFAFA {
+  interface IdentityProvider {
+    + getVerifiedEmails(accessToken) : List<String>
+  }
+  interface EmailService {
+    + send(to, template, data) : String
+  }
+  class GitHubIdentityProvider
+  class BrevoEmailService
+}
+
+AuthController --> AuthService
+AuthController --> LoginCodeService
+AuthController --> SessionService
+GitHubLoginHandler --> AuthService
+GitHubLoginHandler --> SessionService
+GitHubUserService --> IdentityProvider
+GitHubUserService --> EmailAddressChecker
+AuthService --> LoginCodeService
+AuthService --> RoleService
+RoleService --> EmailAddressChecker
+LoginCodeService --> EmailService
+SectionController --> SectionService
+SectionController --> ClassSessionService
+ClassSessionService --> SectionService
+ClassSessionService --> SessionScheduleChecker
+SectionService --> SessionScheduleChecker
+ProfessorDashboardController --> ProfessorDashboardService
+ProfessorDashboardService --> SectionService
+StudentDashboardController --> AuthService
+
+IdentityProvider <|.. GitHubIdentityProvider
+EmailService <|.. BrevoEmailService
+@enduml

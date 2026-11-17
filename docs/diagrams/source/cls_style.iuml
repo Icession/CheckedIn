@@ -1,0 +1,10 @@
+!include common.iuml
+skinparam class {
+  BackgroundColor #F7F9FC
+  BorderColor #2F5597
+  HeaderBackgroundColor #DCE6F2
+}
+skinparam classAttributeIconSize 0
+hide empty members
+skinparam nodesep 40
+skinparam ranksep 60

@@ -1,0 +1,175 @@
+@startuml
+!include cls_style.iuml
+
+class User {
+  - userId : Long
+  - githubId : Long
+  - email : String
+  - firstName : String
+  - lastName : String
+  - role : Role
+  - studentNumber : String
+  - lastLoginAt : LocalDateTime
+  + isProfessor() : boolean
+  + linkStudentNumber(number : String) : void
+}
+
+class CourseSection {
+  - sectionId : Long
+  - subjectCode : String
+  - subjectTitle : String
+  - sectionCode : String
+  - semester : Semester
+  - schoolYear : String
+  - archived : boolean
+  + addSession(s : ClassSession) : void
+  + removeSession(s : ClassSession) : void
+  + archive() : void
+  + isSameTermAs(semester, schoolYear) : boolean
+}
+
+class ClassSession {
+  - sessionId : Long
+  - dayOfWeek : DayOfWeek
+  - startTime : LocalTime
+  - endTime : LocalTime
+  - sessionType : SessionType
+  - deliveryMode : DeliveryMode
+  - roomName : String
+  + getMinutes() : long
+  + getHours() : double
+  + needsLayout() : boolean
+  + overlapsWith(other : ClassSession) : boolean
+}
+
+class RoomLayout {
+  - layoutId : Long
+  - roomName : String
+  - roomType : RoomType
+  - rowCount : int
+  - columnCount : int
+  + getUsableSeats() : List<Seat>
+  + numberWorkstations() : void
+}
+
+class Seat {
+  - seatId : Long
+  - rowIndex : int
+  - columnIndex : int
+  - cellType : CellType
+  - seatLabel : String
+  + isUsable() : boolean
+}
+
+class Enrollment {
+  - enrollmentId : Long
+  - studentNumber : String
+  - lastName : String
+  - firstName : String
+  - status : EnrollmentStatus
+  - nameMismatch : boolean
+  + markDropped() : void
+  + reactivate() : void
+}
+
+class SeatAssignment {
+  - assignmentId : Long
+}
+
+class ClassMeeting {
+  - meetingId : Long
+  - meetingDate : LocalDate
+  - status : MeetingStatus
+  - finalizedAt : LocalDateTime
+  + finalizeMeeting() : void
+  + markNoClass() : void
+}
+
+class AttendanceRecord {
+  - recordId : Long
+  - status : AttendanceStatus
+  - updatedAt : LocalDateTime
+  + nextStatus() : void
+  + setStatus(s : AttendanceStatus, by : User) : void
+}
+
+class ExcuseRequest {
+  - excuseId : Long
+  - reason : String
+  - fileUrl : String
+  - filePublicId : String
+  - fileType : FileType
+  - status : ExcuseStatus
+  - reviewNote : String
+  - submittedAt : LocalDateTime
+  + approve(note : String) : void
+  + reject(note : String) : void
+}
+
+class NotificationLog {
+  - notificationId : Long
+  - type : NotificationType
+  - recipientEmail : String
+  - brevoMessageId : String
+  - deliveryStatus : DeliveryStatus
+  - attemptCount : int
+}
+
+class LoginCode {
+  - codeId : Long
+  - email : String
+  - codeHash : String
+  - expiresAt : LocalDateTime
+  - attemptCount : int
+  - usedAt : LocalDateTime
+  + isExpired(now) : boolean
+  + isUsed() : boolean
+  + recordWrongTry() : void
+  + markUsed(now) : void
+}
+
+enum Role {
+  PROFESSOR
+  STUDENT
+}
+enum AttendanceStatus {
+  PRESENT
+  LATE
+  ABSENT
+  EXCUSED
+}
+enum DeliveryMode {
+  IN_PERSON
+  ONLINE
+  HYBRID
+  FIELD
+}
+enum CellType {
+  SEAT
+  WORKSTATION
+  TABLE
+  AISLE
+  NO_CHAIR
+}
+
+User "1" -- "0..*" CourseSection : teaches >
+User "1" -- "0..*" RoomLayout : creates >
+User "0..1" -- "0..*" Enrollment : linked to >
+CourseSection "1" *-- "1..*" ClassSession
+CourseSection "1" *-- "0..*" Enrollment
+RoomLayout "1" *-- "1..*" Seat
+ClassSession "0..*" --> "0..1" RoomLayout : uses >
+ClassSession "1" *-- "0..*" SeatAssignment
+SeatAssignment "0..*" --> "1" Seat
+SeatAssignment "0..*" --> "1" Enrollment
+ClassSession "1" *-- "0..*" ClassMeeting
+ClassMeeting "1" *-- "0..*" AttendanceRecord
+Enrollment "1" -- "0..*" AttendanceRecord
+AttendanceRecord "1" -- "0..*" ExcuseRequest
+Enrollment "1" -- "0..*" NotificationLog
+
+User ..> Role
+AttendanceRecord ..> AttendanceStatus
+ClassSession ..> DeliveryMode
+Seat ..> CellType
+@enduml

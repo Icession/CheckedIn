@@ -1,0 +1,69 @@
+@startuml
+!include seq_style.iuml
+actor User
+participant "React Frontend" as FE
+participant "AuthController /\nAuthService" as AUTH
+participant "Brevo Email API" as BR
+participant "GitHub Sign-In" as GG
+database "PostgreSQL\n(Supabase)" as DB
+
+group Option 1: email code
+  User -> FE : Enter @cit.edu email, click "Send code"
+  FE -> AUTH : POST /api/auth/code {email}
+  AUTH -> AUTH : Check @cit.edu domain and\nrequest limit (3 per 15 min)
+  AUTH -> DB : Save hash of 6-digit code\n(expires in 10 min)
+  AUTH -> BR : POST /v3/smtp/email (sign-in code)
+  BR --> AUTH : 201 messageId
+  AUTH --> FE : 200 "Code sent"
+  User -> FE : Type the code from the email
+  FE -> AUTH : POST /api/auth/code/verify {email, code}
+  AUTH -> DB : Check hash, expiry, used,\nwrong tries; mark used
+end
+
+group Option 2: GitHub
+  User -> FE : Click "Sign in with GitHub"
+  FE -> AUTH : GET /oauth2/authorization/github
+  AUTH --> User : Redirect to GitHub (client ID, state)
+  User -> GG : Sign in to GitHub, approve CheckedIn
+  GG --> AUTH : Redirect to /login/oauth2/code/github\n(one-time code, state)
+  AUTH -> AUTH : Check state matches
+  AUTH -> GG : POST /login/oauth/access_token\n(code, client ID, client secret)
+  GG --> AUTH : Access token
+  AUTH -> GG : GET /user and /user/emails
+  GG --> AUTH : GitHub ID, emails with verified flags
+  AUTH -> AUTH : Find a verified @cit.edu email
+end
+
+alt Check failed
+  AUTH --> FE : 400 / 403 with plain-language message
+  FE --> User : Show error
+else Signed in
+  AUTH -> DB : Find user by email
+  alt First sign-in
+    AUTH -> DB : Insert user after the name is entered\n(role from professor list)
+  else Returning user
+    AUTH -> DB : Update last_login_at
+  end
+  AUTH --> FE : 200 + session cookie (HttpOnly, 8 h)
+  opt First sign-in
+    FE --> User : Ask for first and last name
+    User -> FE : Enter name
+    FE -> AUTH : POST /api/auth/name
+  end
+  opt Student without student ID
+    FE --> User : Ask for student ID
+    User -> FE : Enter 12-3456-789
+    FE -> AUTH : POST /api/auth/link-student-id
+    AUTH -> DB : Check format and uniqueness;\nlink matching enrollments
+  end
+  FE --> User : Open dashboard by role
+end
+
+group Sign out (FR-009)
+  User -> FE : Click "Sign out"
+  FE -> AUTH : POST /api/auth/sign-out
+  AUTH -> AUTH : End session, expire cookie
+  AUTH --> FE : 204 No Content
+  FE --> User : Sign-in page + "Using a shared computer?\nAlso sign out of GitHub."
+end
+@enduml

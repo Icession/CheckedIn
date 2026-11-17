@@ -1,0 +1,78 @@
+@startuml
+!include act_style.iuml
+|User|
+|GitHub Sign-In|
+|CheckedIn System|
+|Brevo Email API|
+|User|
+start
+:Open CheckedIn sign-in page;
+if (Sign-in method?) then (GitHub)
+  |GitHub Sign-In|
+  :Sign in to GitHub,
+  approve CheckedIn;
+  |CheckedIn System|
+  :Exchange GitHub's one-time code
+  for a token (server side), then
+  get the account's email list;
+  if (State matches and a\nverified @cit.edu email?) then (no)
+    :Show "Please use your
+    CIT-U email address";
+    stop
+  else (yes)
+  endif
+else (Email code)
+  |User|
+  :Enter @cit.edu email and
+  click "Send code";
+  |CheckedIn System|
+  if (Email ends in @cit.edu and\nfewer than 3 codes in 15 min?) then (no)
+    :Show error message;
+    stop
+  else (yes)
+  endif
+  :Create 6-digit code; save only its hash
+  with a 10-minute expiry;
+  |Brevo Email API|
+  :Send code to the user's inbox;
+  |User|
+  :Type the code from the email;
+  |CheckedIn System|
+  if (Code matches, not expired,\nnot used, under 5 wrong tries?) then (no)
+    :Count wrong try and
+    show error message;
+    stop
+  else (yes)
+  endif
+  :Mark code as used;
+endif
+if (Account exists?) then (no)
+  :Create user account;
+  if (Email on professor list?) then (yes)
+    :Set role = PROFESSOR;
+  else (no)
+    :Set role = STUDENT;
+  endif
+  |User|
+  :Enter first and last name;
+  |CheckedIn System|
+else (yes)
+  :Update last login time;
+endif
+if (Student without student ID?) then (yes)
+  |User|
+  :Enter student ID;
+  |CheckedIn System|
+  :Check format 00-0000-000 and
+  that no other account uses it;
+  :Link all enrollments with
+  the same ID;
+  :Flag enrollments whose last
+  name does not match;
+else (no)
+endif
+:Start session (HttpOnly cookie, 8 h);
+:Open Professor or Student dashboard;
+|User|
+stop
+@enduml

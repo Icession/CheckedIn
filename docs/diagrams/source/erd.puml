@@ -1,0 +1,175 @@
+@startuml
+!include common.iuml
+hide circle
+hide empty methods
+skinparam linetype polyline
+skinparam nodesep 60
+skinparam ranksep 70
+skinparam class {
+  BackgroundColor #F7F9FC
+  BorderColor #2F5597
+  HeaderBackgroundColor #DCE6F2
+  FontStyle bold
+}
+
+entity "users" as users {
+  * <b>user_id</b> : BIGINT <<PK>>
+  --
+  github_id : BIGINT <<UQ>>
+  * email : VARCHAR(120) <<UQ>>
+  * first_name : VARCHAR(60)
+  * last_name : VARCHAR(60)
+  * role : ENUM(PROFESSOR, STUDENT)
+  student_number : CHAR(11) <<UQ>>
+  * created_at : TIMESTAMP
+  last_login_at : TIMESTAMP
+}
+
+entity "login_codes" as codes {
+  * <b>code_id</b> : BIGINT <<PK>>
+  --
+  * email : VARCHAR(120)
+  * code_hash : VARCHAR(100)
+  * expires_at : TIMESTAMP
+  * attempt_count : SMALLINT
+  used_at : TIMESTAMP
+  * created_at : TIMESTAMP
+}
+
+entity "course_sections" as sections {
+  * <b>section_id</b> : BIGINT <<PK>>
+  --
+  * professor_id : BIGINT <<FK>>
+  * subject_code : VARCHAR(15)
+  * subject_title : VARCHAR(120)
+  * section_code : VARCHAR(10)
+  * semester : ENUM(FIRST, SECOND, SUMMER)
+  * school_year : CHAR(9)
+  * is_archived : BOOLEAN
+  * created_at : TIMESTAMP
+}
+
+entity "class_sessions" as sessions {
+  * <b>session_id</b> : BIGINT <<PK>>
+  --
+  * section_id : BIGINT <<FK>>
+  layout_id : BIGINT <<FK>>
+  * day_of_week : ENUM(MONDAY..SATURDAY)
+  * start_time : TIME
+  * end_time : TIME
+  * session_type : ENUM(LECTURE, LABORATORY)
+  * delivery_mode : ENUM(IN_PERSON, ONLINE, HYBRID, FIELD)
+  room_name : VARCHAR(30)
+}
+
+entity "room_layouts" as layouts {
+  * <b>layout_id</b> : BIGINT <<PK>>
+  --
+  * created_by : BIGINT <<FK>>
+  * room_name : VARCHAR(30) <<UQ>>
+  * room_type : ENUM(LECTURE_ROOM, COMPUTER_LAB)
+  * row_count : SMALLINT
+  * column_count : SMALLINT
+  * created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "seats" as seats {
+  * <b>seat_id</b> : BIGINT <<PK>>
+  --
+  * layout_id : BIGINT <<FK>>
+  * row_index : SMALLINT
+  * column_index : SMALLINT
+  * cell_type : ENUM(SEAT, WORKSTATION, TABLE,
+     AISLE, NO_CHAIR)
+  seat_label : VARCHAR(10)
+}
+
+entity "enrollments" as enrollments {
+  * <b>enrollment_id</b> : BIGINT <<PK>>
+  --
+  * section_id : BIGINT <<FK>>
+  student_user_id : BIGINT <<FK>>
+  * student_number : CHAR(11)
+  * last_name : VARCHAR(60)
+  * first_name : VARCHAR(60)
+  * status : ENUM(ACTIVE, DROPPED)
+  * name_mismatch : BOOLEAN
+  * created_at : TIMESTAMP
+}
+
+entity "seat_assignments" as assignments {
+  * <b>assignment_id</b> : BIGINT <<PK>>
+  --
+  * session_id : BIGINT <<FK>>
+  * seat_id : BIGINT <<FK>>
+  * enrollment_id : BIGINT <<FK>>
+}
+
+entity "class_meetings" as meetings {
+  * <b>meeting_id</b> : BIGINT <<PK>>
+  --
+  * session_id : BIGINT <<FK>>
+  * meeting_date : DATE
+  * status : ENUM(OPEN, FINALIZED, NO_CLASS)
+  * created_at : TIMESTAMP
+  finalized_at : TIMESTAMP
+}
+
+entity "attendance_records" as records {
+  * <b>record_id</b> : BIGINT <<PK>>
+  --
+  * meeting_id : BIGINT <<FK>>
+  * enrollment_id : BIGINT <<FK>>
+  * status : ENUM(PRESENT, LATE, ABSENT, EXCUSED)
+  * updated_by : BIGINT <<FK>>
+  * updated_at : TIMESTAMP
+}
+
+entity "excuse_requests" as excuses {
+  * <b>excuse_id</b> : BIGINT <<PK>>
+  --
+  * record_id : BIGINT <<FK>>
+  * submitted_by : BIGINT <<FK>>
+  * reason : VARCHAR(500)
+  * file_url : VARCHAR(500)
+  * file_public_id : VARCHAR(255)
+  * file_type : ENUM(JPG, PNG, PDF)
+  * status : ENUM(PENDING, APPROVED, REJECTED)
+  review_note : VARCHAR(300)
+  * submitted_at : TIMESTAMP
+  reviewed_at : TIMESTAMP
+}
+
+entity "notification_logs" as notifs {
+  * <b>notification_id</b> : BIGINT <<PK>>
+  --
+  * enrollment_id : BIGINT <<FK>>
+  * notification_type : ENUM(WARN_12H, WARN_15H,
+     DROPPED, EXCUSE_APPROVED, EXCUSE_REJECTED)
+  * recipient_email : VARCHAR(120)
+  brevo_message_id : VARCHAR(100)
+  * delivery_status : ENUM(SENT, FAILED)
+  * attempt_count : SMALLINT
+  * created_at : TIMESTAMP
+}
+
+users ||--o{ sections : "teaches"
+users -[hidden]right- codes
+users ||--o{ layouts : "creates"
+users |o--o{ enrollments : "linked to"
+users ||--o{ excuses : "submits"
+users ||--o{ records : "last updates"
+sections ||--|{ sessions : "meets in"
+sections ||--o{ enrollments : "has"
+layouts ||--|{ seats : "contains"
+layouts |o--o{ sessions : "used by"
+sessions ||--o{ assignments : "has"
+seats ||--o{ assignments : "holds"
+enrollments ||--o{ assignments : "seated by"
+sessions ||--o{ meetings : "held as"
+meetings ||--o{ records : "records"
+enrollments ||--o{ records : "has"
+records ||--o{ excuses : "excused by"
+enrollments ||--o{ notifs : "notified by"
+@enduml

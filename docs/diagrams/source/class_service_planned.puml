@@ -1,0 +1,89 @@
+@startuml
+!include cls_style.iuml
+skinparam nodesep 25
+skinparam ranksep 55
+
+package "Controllers (REST API)" #FAFAFA {
+  class LayoutController {
+    + createLayout(request)
+    + updateCells(layoutId, cells)
+    + listLayouts(roomName)
+  }
+  class RosterController {
+    + previewImport(sectionId, file)
+    + autoArrange(sessionId, options)
+    + exportAttendance(sectionId)
+  }
+  class AttendanceController {
+    + openMeeting(sessionId, date)
+    + saveAttendance(meetingId, records)
+  }
+  class ExcuseController {
+    + submit(recordId, reason, file)
+    + review(excuseId, decision)
+  }
+}
+
+package "Services" #FAFAFA {
+  class LayoutService {
+    + saveLayout(email, request)
+    + numberWorkstations(layout)
+  }
+  class ClassListImportService {
+    + parse(file) : ImportPreview
+    + confirm(sectionId, rows) : ImportResult
+  }
+  class SeatArrangementService {
+    + autoArrange(sessionId, corner, direction)
+  }
+  class ExportService {
+    + buildWorkbook(sectionId) : byte[]
+  }
+  class AttendanceService {
+    + openMeeting(sessionId, date) : ClassMeeting
+    + saveRecords(meetingId, records)
+  }
+  class ExcuseService {
+    + submit(recordId, reason, file) : ExcuseRequest
+    + review(excuseId, approve, note)
+  }
+  class AbsenceCalculator {
+    + computeMinutes(enrollment) : long
+    + convertedLates(lateCount) : int
+    + updateDropStatus(enrollment)
+  }
+  class NotificationService {
+    + checkThresholds(enrollment)
+    + sendExcuseResult(excuse)
+  }
+}
+
+package "External Integration" #FAFAFA {
+  interface FileStorageService {
+    + upload(file) : StoredFile
+    + signedUrl(publicId, minutes) : String
+  }
+  interface EmailService {
+    + send(to, template, data) : String
+  }
+  class CloudinaryStorageService
+  class BrevoEmailService
+}
+
+LayoutController --> LayoutService
+RosterController --> ClassListImportService
+RosterController --> SeatArrangementService
+RosterController --> ExportService
+AttendanceController --> AttendanceService
+ExcuseController --> ExcuseService
+
+AttendanceService --> AbsenceCalculator
+AttendanceService --> NotificationService
+ExcuseService --> AbsenceCalculator
+ExcuseService --> NotificationService
+ExcuseService --> FileStorageService
+NotificationService --> EmailService
+
+FileStorageService <|.. CloudinaryStorageService
+EmailService <|.. BrevoEmailService
+@enduml

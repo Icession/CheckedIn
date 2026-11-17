@@ -1,0 +1,48 @@
+@startuml
+!include act_style.iuml
+|Student|
+start
+:Open subject and select an
+ABSENT meeting;
+:Enter reason and attach file
+(JPG, PNG or PDF);
+:Click "Submit Excuse";
+|CheckedIn System|
+if (Within 7 days, file valid (<= 5 MB)\nand no pending excuse?) then (no)
+  :Show error message;
+  |Student|
+  stop
+else (yes)
+endif
+|Cloudinary|
+:Store file as private asset;
+:Return secure URL and public ID;
+|CheckedIn System|
+:Save excuse request (PENDING);
+|Professor|
+:Open pending excuses list;
+|CheckedIn System|
+:Generate signed URL (10-minute expiry);
+|Cloudinary|
+:Deliver file;
+|Professor|
+:Review document;
+if (Decision?) then (Approve)
+  |CheckedIn System|
+  :Set excuse APPROVED;
+  :Set attendance record = EXCUSED (blue);
+  :Recompute absence hours;
+else (Reject)
+  |CheckedIn System|
+  :Set excuse REJECTED and save note;
+  :Record stays ABSENT;
+endif
+|Brevo Email API|
+:Send excuse result email to student;
+|CheckedIn System|
+:Write notification log;
+|Student|
+:See updated status on
+attendance page;
+stop
+@enduml

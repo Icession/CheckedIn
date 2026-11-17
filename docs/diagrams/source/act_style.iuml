@@ -1,0 +1,12 @@
+!include common.iuml
+skinparam activity {
+  BackgroundColor #F7F9FC
+  BorderColor #2F5597
+  DiamondBackgroundColor #FFF4D6
+  DiamondBorderColor #B8860B
+}
+skinparam swimlane {
+  BorderColor #2F5597
+  TitleFontStyle bold
+  TitleFontSize 13
+}

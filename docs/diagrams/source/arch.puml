@@ -1,0 +1,43 @@
+@startuml
+!include common.iuml
+skinparam componentStyle rectangle
+skinparam rectangle {
+  BackgroundColor #F7F9FC
+  BorderColor #2F5597
+}
+skinparam node {
+  BackgroundColor #FAFAFA
+  BorderColor #2F5597
+}
+skinparam actor {
+  BackgroundColor #DCE6F2
+  BorderColor #2F5597
+}
+skinparam database {
+  BackgroundColor #F7F9FC
+  BorderColor #2F5597
+}
+left to right direction
+actor Professor
+actor Student
+node "Client Device\n(Web Browser)" {
+  rectangle "React Frontend\n(Vite, React Router)" as FE
+}
+node "Application Server" {
+  rectangle "Spring Boot REST API\n(Spring Security, JPA,\nApache POI)" as BE
+}
+database "PostgreSQL\n(Supabase)" as DB
+cloud "External Systems" {
+  rectangle "GitHub Sign-In\n(OAuth 2.0)" as MS
+  rectangle "Cloudinary\n(file storage)" as CL
+  rectangle "Brevo\n(sign-in codes and\nnotification email)" as BR
+}
+Professor --> FE
+Student --> FE
+FE --> BE : HTTPS / JSON
+FE --> MS : Sign-in redirect
+BE --> DB : JDBC over SSL
+BE --> MS : Code exchange,\nverified emails
+BE --> CL : Upload / signed URL
+BE --> BR : Send email (REST)
+@enduml

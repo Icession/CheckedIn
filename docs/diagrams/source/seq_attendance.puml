@@ -1,0 +1,45 @@
+@startuml
+!include seq_style.iuml
+actor Professor
+participant "React Frontend" as FE
+participant "AttendanceController" as AC
+participant "AttendanceService" as AS
+participant "AbsenceCalculator" as CALC
+participant "NotificationService" as NS
+database "PostgreSQL\n(Supabase)" as DB
+participant "Brevo Email API" as BR
+
+Professor -> FE : Open today's session
+FE -> AC : POST /api/sessions/{id}/meetings {date}
+AC -> AS : openMeeting(sessionId, date)
+AS -> DB : Find meeting for session + date
+alt No meeting yet
+  AS -> DB : Insert meeting and PRESENT\nrecord for each ACTIVE student
+end
+AS --> AC : Meeting, records, seat plan
+AC --> FE : 200 MeetingDto
+FE --> Professor : Seat map (all green)
+loop For each student to change
+  Professor -> FE : Tap seat
+  FE -> FE : Cycle status and color\n(no server call yet)
+end
+Professor -> FE : Click "Save Attendance"
+FE -> AC : PUT /api/meetings/{id}/records [changes]
+AC -> AS : saveRecords(meetingId, records)
+AS -> DB : Update records and finalize\nmeeting (one transaction)
+loop For each changed student
+  AS -> CALC : computeHours(enrollment)
+  CALC -> DB : Read records and session hours
+  CALC --> AS : Absence hours
+  AS -> CALC : updateDropStatus(enrollment)
+  AS -> NS : checkThresholds(enrollment)
+  opt 12 h, 15 h or 18 h reached and not yet sent
+    NS -> BR : POST /v3/smtp/email (warning or drop)
+    BR --> NS : 201 messageId
+    NS -> DB : Insert notification log (SENT)
+  end
+end
+AS --> AC : Saved summary
+AC --> FE : 200 OK
+FE --> Professor : "Attendance saved" + counts
+@enduml

@@ -1,0 +1,59 @@
+@startuml
+!include act_style.iuml
+|Professor|
+start
+:Open today's session from dashboard;
+|CheckedIn System|
+if (Meeting for this session\nand date exists?) then (no)
+  :Create class meeting;
+  :Create a PRESENT record for
+  every ACTIVE student;
+else (yes)
+  :Load saved records;
+endif
+if (Delivery mode?) then (In-person)
+  :Show seat map with ID and
+  last name on each seat;
+elseif () then (Hybrid)
+  :Show seat map plus side list
+  of students without seats;
+else (Online / Field)
+  :Show list view;
+endif
+|Professor|
+repeat
+  :Tap a seat or list row;
+  |CheckedIn System|
+  :Cycle status: Present (green) -> Late (yellow)
+  -> Absent (red) -> Excused (blue);
+  :Update live count;
+  |Professor|
+repeat while (More changes?) is (yes) not (no)
+:Click "Save Attendance";
+|CheckedIn System|
+:Save all records in one transaction
+and finalize the meeting;
+:Recompute absence hours for each
+affected student;
+note right
+  hours = sum of ABSENT session hours
+  + session hours of every 3rd LATE
+  (EXCUSED counts 0)
+end note
+if (Reached 12, 15 or 18 hours\nand not yet notified?) then (yes)
+  if (Hours >= 18?) then (yes)
+    :Set enrollment status = DROPPED;
+  else (no)
+  endif
+  |Brevo Email API|
+  :Send warning or drop email
+  to student's institutional email;
+  |CheckedIn System|
+  :Write notification log
+  (SENT or FAILED);
+else (no)
+endif
+:Show "Attendance saved";
+|Professor|
+stop
+@enduml

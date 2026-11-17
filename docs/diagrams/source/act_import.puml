@@ -1,0 +1,56 @@
+@startuml
+!include act_style.iuml
+|Professor|
+start
+:Open section and click "Import Class List";
+:Upload .xlsx file;
+|CheckedIn System|
+if (File is .xlsx and <= 5 MB?) then (no)
+  :Show file error;
+  |Professor|
+  stop
+else (yes)
+endif
+|CheckedIn System|
+:Read rows with Apache POI;
+:Check each row: missing fields,
+ID format, duplicates in file,
+ID already in section;
+:Show preview with valid rows
+and rows with errors;
+|Professor|
+if (Confirm import?) then (no)
+  stop
+else (yes)
+endif
+|CheckedIn System|
+:Save valid rows as ACTIVE enrollments;
+:Link rows to existing student
+accounts with the same ID;
+:Show "X added, Y skipped";
+|Professor|
+:Open seat plan for a session;
+if (Auto-arrange?) then (yes)
+  :Choose starting corner and
+  direction (row or column);
+  |CheckedIn System|
+  :Sort students by last name,
+  then first name;
+  :Fill usable seats from the chosen
+  corner in the chosen direction;
+  if (More students than seats?) then (yes)
+    :Put extra students in
+    "Unassigned" list and warn;
+  else (no)
+  endif
+else (no)
+  |Professor|
+  :Drag students to seats manually;
+endif
+|Professor|
+:Adjust or swap seats if needed;
+:Click "Save Seat Plan";
+|CheckedIn System|
+:Save seat assignments;
+stop
+@enduml

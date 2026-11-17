@@ -1,0 +1,45 @@
+@startuml
+!include seq_style.iuml
+actor Student
+actor Professor
+participant "React Frontend" as FE
+participant "ExcuseController /\nExcuseService" as EX
+participant "Cloudinary" as CL
+participant "AbsenceCalculator" as CALC
+database "PostgreSQL\n(Supabase)" as DB
+participant "Brevo Email API" as BR
+
+group Submit excuse
+  Student -> FE : Choose ABSENT meeting, enter reason, attach file
+  FE -> EX : POST /api/records/{id}/excuses (multipart)
+  EX -> DB : Check record owner, status ABSENT,\nwithin 7 days, no pending excuse
+  EX -> EX : Check file type (JPG/PNG/PDF) and size <= 5 MB
+  EX -> CL : Upload file (authenticated asset)
+  CL --> EX : public_id, secure_url
+  EX -> DB : Insert excuse (PENDING)
+  EX --> FE : 201 Created
+  FE --> Student : "Excuse submitted"
+end
+
+group Review excuse
+  Professor -> FE : Open pending excuses
+  FE -> EX : GET /api/sections/{id}/excuses?status=PENDING
+  EX -> CL : Create signed URL (10 min)
+  CL --> EX : Signed URL
+  EX --> FE : Excuse list with file links
+  Professor -> FE : Approve or reject (with note)
+  FE -> EX : PATCH /api/excuses/{id} {decision, note}
+  alt Approve
+    EX -> DB : Excuse = APPROVED; record = EXCUSED
+    EX -> CALC : computeHours(enrollment)
+    CALC --> EX : Updated hours
+  else Reject
+    EX -> DB : Excuse = REJECTED; record stays ABSENT
+  end
+  EX -> BR : Send excuse result email
+  BR --> EX : 201 messageId
+  EX -> DB : Insert notification log
+  EX --> FE : 200 Updated excuse
+  FE --> Professor : Status updated
+end
+@enduml

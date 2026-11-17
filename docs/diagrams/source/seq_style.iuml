@@ -1,0 +1,13 @@
+!include common.iuml
+skinparam sequence {
+  ParticipantBackgroundColor #DCE6F2
+  ParticipantBorderColor #2F5597
+  ActorBackgroundColor #DCE6F2
+  ActorBorderColor #2F5597
+  LifeLineBorderColor #7F8FA6
+  GroupBackgroundColor #FFF4D6
+  GroupBorderColor #B8860B
+}
+skinparam maxMessageSize 220
+autonumber
+hide footbox
