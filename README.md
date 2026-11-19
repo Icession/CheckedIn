@@ -14,6 +14,24 @@ IT342 – Systems Integration and Architecture 1 · G01 · Kurt Carcueva
 | Where the code is | [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md) |
 | Diagrams | [`docs/diagrams/`](docs/diagrams/) |
 
+## Project Increment 1 – User Accounts and Authentication
+
+Built in Phase 1 (see [`docs/BUILD_PLAN.md`](docs/BUILD_PLAN.md)). Backend paths are under
+`backend/src/main/java/edu/cit/checkedin/`, frontend paths under `frontend/src/`.
+
+| Requirement | What we built | Where the code is |
+|---|---|---|
+| Account creation | The first sign-in needs a verified `@cit.edu` email (email code or GitHub). Then the user fills in the name form: first and last name are required and checked. The account row is created only after the name is saved (FR-003). The email is unique, so there are no duplicate accounts, and signing in with GitHub links the GitHub ID to the same account. Accounts are stored in the Supabase `users` table. | `auth/AuthService.java` (`saveName`), `auth/User.java`, `auth/UserRepository.java`, `auth/dto/SaveNameRequest.java`, `components/NameForm.jsx` |
+| Credentials | CheckedIn has no passwords, by design (SRS v1.3, FR-001, FR-002, NFR-008): sign-in is a one-time 6-digit email code or GitHub. Codes are hashed with BCrypt and never stored in plain text. They expire after 10 minutes, allow 5 wrong tries, work only once, and an email can ask for at most 3 codes every 15 minutes. GitHub's client secret and all keys and passwords live only in `backend/.env`, which git ignores; the GitHub code-for-token exchange happens only on the server. | `auth/LoginCodeService.java`, `auth/LoginCode.java`, `common/PasswordEncoderConfig.java`, `auth/GitHubUserService.java`, `backend/src/main/resources/application.properties` (`checkedin.login-code.*`), `backend/.env.example` |
+| Roles | Professors are the emails listed in `PROFESSOR_EMAILS` in `backend/.env` (FR-004); everyone else is a student. The role is checked again on every request (FR-008). | `auth/RoleService.java`, `common/SecurityConfig.java` |
+| Login and logout | Plain error messages for a wrong, expired or already used code, too many wrong tries, a non-`@cit.edu` email, and a GitHub account without a verified `@cit.edu` email. A signed-in user gets an HttpOnly session cookie that lasts 8 hours (NFR-009). Sign out ends the session and deletes the cookie. | `auth/AuthController.java`, `auth/SessionService.java`, `auth/EmailAddressChecker.java`, `auth/GitHubLoginHandler.java`, `pages/SignInPage.jsx`, `components/SignOutButton.jsx` |
+| Role dashboards | `/professor` and `/student`. After sign-in, each user is sent to their own dashboard. The backend answers 403 when one role calls the other role's API (`SecurityConfig`), and the pages send signed-out or wrong-role users back to the sign-in page. | `common/SecurityConfig.java`, `student/StudentDashboardController.java`, `App.jsx`, `pages/ProfessorDashboardPage.jsx`, `pages/StudentDashboardPage.jsx` |
+
+**To run it:** copy `backend/.env.example` to `backend/.env` and fill it in (see "Set up the database",
+"Set up Brevo for emails" and "Set up GitHub sign-in" below). Then start the backend with `.\mvnw.cmd spring-boot:run`
+in the `backend` folder, and the frontend with `npm install` (first time only) and `npm run dev` in the `frontend`
+folder. Open http://localhost:5173. The full steps are in "Run the project (Windows)".
+
 ## Tech stack
 
 - **Backend:** Java 17, Spring Boot 3.3, Maven, Spring Data JPA
