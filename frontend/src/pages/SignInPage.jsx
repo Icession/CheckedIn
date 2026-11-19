@@ -9,9 +9,7 @@ import VerifyCodeForm from '../components/VerifyCodeForm.jsx'
 import GitHubSignInButton from '../components/GitHubSignInButton.jsx'
 import NameForm from '../components/NameForm.jsx'
 import StudentIdForm from '../components/StudentIdForm.jsx'
-
-// FR-008: professors only see professor pages, students only student pages
-const DASHBOARD_PATHS = { PROFESSOR: '/professor', STUDENT: '/student' }
+import { DASHBOARD_PATHS } from '../utils/roles.js'
 
 // When GitHub sign-in fails, the backend sends the user back here with ?signInError=<code>
 const SIGN_IN_ERROR_MESSAGES = {

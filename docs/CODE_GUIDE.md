@@ -108,6 +108,7 @@ When a feature has several pages, group them: `pages/attendance/AttendancePage.j
 | How seats are auto-arranged A–Z | `seating/SeatArrangementService.java` |
 | Sign-in page (email code and GitHub button) | `frontend/src/pages/SignInPage.jsx` |
 | Who may open which page (403 on the wrong role) | `common/SecurityConfig.java` and `auth/RoleService.java` |
+| The menu for each role and the frontend route guard | `frontend/src/components/PageHeader.jsx`, `components/RequireRole.jsx` (around the routes in `App.jsx`), `utils/roles.js`, `hooks/useCurrentUser.js` |
 | Sign out | `auth/SessionService.java` (`POST /api/auth/sign-out` in `auth/AuthController.java`) |
 | How sign-in codes are made, hashed and checked | `auth/LoginCodeService.java` |
 | GitHub verified-email check | `integration/GitHubIdentityProvider.java` (reads GitHub's verified emails) and `auth/GitHubUserService.java` (requires a verified @cit.edu one) |

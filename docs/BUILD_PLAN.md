@@ -58,6 +58,9 @@ Steps (do them one at a time):
 - [x] 1i. Professor and student dashboards (empty for now), sign out, 403 on wrong role (FR-008, FR-009)
       Next to sign-out, a short hint: "Using a shared computer? Also sign out of GitHub."
       (signing out of CheckedIn does not sign you out of GitHub, which would sign the next person in)
+- [x] Follow-up: a menu with only the pages of the user's role (name, role badge, Sign out, current page
+      highlighted) and a frontend route guard, `RequireRole`: signed out -> sign-in page, other role -> own
+      dashboard (FR-008). The backend's 401/403 rules stay the real protection.
 
 Done when: you can sign in both ways with your @cit.edu email and see the correct dashboard for your role.
 
