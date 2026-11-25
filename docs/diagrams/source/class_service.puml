@@ -33,12 +33,16 @@ package "Controllers (REST API)" #FAFAFA {
     + getProfile()
     + updateProfile(request)
   }
+  class PasswordController {
+    + signIn(request)
+  }
 }
 
 package "Services" #FAFAFA {
   class AuthService {
     + signInWithCode(email, code)
     + signInWithGitHub(githubId, email)
+    + signInWithPassword(email)
     + saveName(email, githubId, request)
     + linkStudentNumber(email, number)
     + assignRole(email) : Role
@@ -85,6 +89,9 @@ package "Services" #FAFAFA {
     + getProfile(email) : ProfileResponse
     + updateName(email, request) : ProfileResponse
   }
+  class PasswordSignInService {
+    + signIn(email, password) : CurrentUserResponse
+  }
 }
 
 package "External Integration" #FAFAFA {
@@ -119,6 +126,10 @@ ProfessorDashboardService --> SectionService
 StudentDashboardController --> AuthService
 ProfileController --> ProfileService
 ProfileService --> AuthService
+PasswordController --> PasswordSignInService
+PasswordController --> SessionService
+PasswordSignInService --> AuthService
+PasswordSignInService --> EmailAddressChecker
 
 IdentityProvider <|.. GitHubIdentityProvider
 EmailService <|.. BrevoEmailService

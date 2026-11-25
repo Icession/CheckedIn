@@ -25,11 +25,11 @@ export default function SignOutButton() {
         {isSigningOut ? 'Signing out…' : 'Sign out'}
       </button>
       <p className="hint-text">
-        Using a shared computer? Also{' '}
+        Shared computer?{' '}
         <a href="https://github.com/logout" target="_blank" rel="noreferrer">
-          sign out of GitHub
-        </a>
-        .
+          Sign out of GitHub
+        </a>{' '}
+        too.
       </p>
     </div>
   )

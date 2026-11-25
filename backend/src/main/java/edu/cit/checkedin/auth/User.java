@@ -18,6 +18,7 @@ import org.hibernate.annotations.Check;
  * A person who signs in to CheckedIn with their @cit.edu email (emailed code or GitHub):
  * a professor or a student. One row in the "users" table (see the ERD in the SRS, Figure 2).
  * Covers FR-003 (account created on first sign-in), FR-004 (role) and FR-005 (linked student ID).
+ * Increment 2 / SRS v1.4 adds an optional password, stored only as a BCrypt hash.
  */
 @Entity
 // "user" is a reserved word in PostgreSQL, so the table is named "users"
@@ -26,6 +27,9 @@ import org.hibernate.annotations.Check;
 // Supabase table editor (where typing NULL would otherwise save the text "NULL")
 @Check(name = "users_student_number_format",
         constraints = "student_number IS NULL OR student_number ~ '^[0-9]{2}-[0-9]{4}-[0-9]{3}$'")
+// Only a BCrypt hash (60 characters, starting with $2) can be saved, never a password typed in by hand
+@Check(name = "users_password_hash_is_bcrypt",
+        constraints = "password_hash IS NULL OR (length(password_hash) = 60 AND password_hash LIKE '$2%')")
 public class User {
 
     @Id
@@ -56,6 +60,12 @@ public class User {
     // so professors (no student number) do not clash, but two students can never share one ID.
     @Column(name = "student_number", columnDefinition = "char(11)", unique = true)
     private String studentNumber;
+
+    // Increment 2 / SRS v1.4: the BCrypt hash of the password, never the password itself. Null until the user
+    // creates one (accounts from before Increment 2 set one with "Forgot password?"). No response DTO has this field,
+    // so it never reaches the browser.
+    @Column(name = "password_hash", length = 60)
+    private String passwordHash;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -97,6 +107,14 @@ public class User {
 
     public Long getUserId() {
         return userId;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
     public Long getGithubId() {

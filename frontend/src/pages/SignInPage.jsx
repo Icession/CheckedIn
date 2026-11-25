@@ -1,6 +1,6 @@
-// SignInPage — the first page of CheckedIn. Sign in with a code sent to your CIT-U email,
-// or with GitHub. On the first sign-in, enter your name; students also link their student ID.
-// Then it opens the dashboard for the user's role. Covers FR-001 – FR-005 and FR-008.
+// SignInPage — the first page of CheckedIn. Sign in with a code sent to your CIT-U email, with a password
+// (Increment 2 / SRS v1.4), or with GitHub. On the first sign-in, enter your name and create a password; students
+// also link their student ID. Then it opens the dashboard for the user's role. Covers FR-001 – FR-005 and FR-008.
 import { useEffect, useState } from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
 import { getCurrentUser } from '../api/authApi.js'
@@ -8,6 +8,7 @@ import SendCodeForm from '../components/SendCodeForm.jsx'
 import VerifyCodeForm from '../components/VerifyCodeForm.jsx'
 import GitHubSignInButton from '../components/GitHubSignInButton.jsx'
 import NameForm from '../components/NameForm.jsx'
+import PasswordSignInForm from '../components/PasswordSignInForm.jsx'
 import StudentIdForm from '../components/StudentIdForm.jsx'
 import { DASHBOARD_PATHS } from '../utils/roles.js'
 
@@ -25,6 +26,8 @@ export default function SignInPage() {
   const [currentUser, setCurrentUser] = useState(null)
   // Set after a code was emailed: { email, expiresInMinutes }
   const [codeSentTo, setCodeSentTo] = useState(null)
+  // Increment 2: the email-code form or the password form (both need the CIT-U email)
+  const [usePassword, setUsePassword] = useState(false)
   const [searchParams] = useSearchParams()
   const gitHubError = SIGN_IN_ERROR_MESSAGES[searchParams.get('signInError')]
   const isSignedIn = !isChecking && currentUser !== null
@@ -60,7 +63,10 @@ export default function SignInPage() {
         {!isChecking && !currentUser && !codeSentTo && (
           <>
             {gitHubError && <p className="error-text" role="alert">{gitHubError}</p>}
-            <SendCodeForm onCodeSent={setCodeSentTo} />
+            {usePassword ? <PasswordSignInForm onSignedIn={setCurrentUser} /> : <SendCodeForm onCodeSent={setCodeSentTo} />}
+            <button type="button" className="button-link" onClick={() => setUsePassword(!usePassword)}>
+              {usePassword ? 'Get a sign-in code by email instead' : 'Sign in with password instead'}
+            </button>
             <p className="divider-text">or</p>
             <GitHubSignInButton />
           </>

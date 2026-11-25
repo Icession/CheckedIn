@@ -111,7 +111,7 @@ class AuthControllerTest {
     @Test
     void savingTheNameNeedsASignedInUser() throws Exception {
         mockMvc.perform(post("/api/auth/name").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"firstName\": \"Juan\", \"lastName\": \"Dela Cruz\"}"))
+                        .content("{\"firstName\": \"Juan\", \"lastName\": \"Dela Cruz\", \"password\": \"sunflower42\", \"confirmPassword\": \"sunflower42\"}"))
                 .andExpect(status().isUnauthorized());
         verifyNoInteractions(authService);
     }
@@ -119,11 +119,11 @@ class AuthControllerTest {
     @Test
     void savingTheNameCreatesTheAccountForTheSignedInEmail() throws Exception {
         MockHttpSession session = signInWithCode();
-        when(authService.saveName(eq(EMAIL), isNull(), eq(new SaveNameRequest("Juan", "Dela Cruz"))))
+        when(authService.saveName(eq(EMAIL), isNull(), eq(new SaveNameRequest("Juan", "Dela Cruz", "sunflower42", "sunflower42"))))
                 .thenReturn(new CurrentUserResponse(EMAIL, "Juan", "Dela Cruz", Role.STUDENT, null, false, true));
 
         mockMvc.perform(post("/api/auth/name").session(session).contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"firstName\": \"  Juan \", \"lastName\": \"Dela   Cruz\"}"))
+                        .content("{\"firstName\": \"  Juan \", \"lastName\": \"Dela   Cruz\", \"password\": \"sunflower42\", \"confirmPassword\": \"sunflower42\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.role").value("STUDENT"))
                 .andExpect(jsonPath("$.needsName").value(false));
@@ -139,12 +139,12 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON).content(SIGN_IN_JSON))
                 .andReturn();
         MockHttpSession newSession = (MockHttpSession) signIn.getRequest().getSession(false);
-        when(authService.saveName(eq(EMAIL), isNull(), eq(new SaveNameRequest("Juan", "Dela Cruz"))))
+        when(authService.saveName(eq(EMAIL), isNull(), eq(new SaveNameRequest("Juan", "Dela Cruz", "sunflower42", "sunflower42"))))
                 .thenReturn(new CurrentUserResponse(EMAIL, "Juan", "Dela Cruz", Role.STUDENT, null, false, true));
 
         // Matches only when the GitHub ID passed on is null
         mockMvc.perform(post("/api/auth/name").session(newSession).contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"firstName\": \"Juan\", \"lastName\": \"Dela Cruz\"}"))
+                        .content("{\"firstName\": \"Juan\", \"lastName\": \"Dela Cruz\", \"password\": \"sunflower42\", \"confirmPassword\": \"sunflower42\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName").value("Juan"));
     }
@@ -154,7 +154,7 @@ class AuthControllerTest {
         MockHttpSession session = signInWithCode();
 
         mockMvc.perform(post("/api/auth/name").session(session).contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"firstName\": \"Juan2\", \"lastName\": \"Dela Cruz\"}"))
+                        .content("{\"firstName\": \"Juan2\", \"lastName\": \"Dela Cruz\", \"password\": \"sunflower42\", \"confirmPassword\": \"sunflower42\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value(
                         "Please use only letters, spaces, hyphens (-), apostrophes (') and periods (.) in your first name."));

@@ -90,21 +90,34 @@ h2 { font-size: 1.1rem; }
 .button-secondary:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* ---------- Dashboards ---------- */
+/* The page header is a grid: logo, menu, name + badge and Sign out on one vertically centered line, and the
+   one-line shared-computer hint right under it. "display: contents" lets the name and the Sign out button
+   (which sit inside .header-user and .sign-out) take part in the header's grid directly. */
 .dashboard-header {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: var(--space);
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  grid-template-areas: "brand nav user signout" "hint hint hint hint";
+  align-items: center;
+  column-gap: var(--space);
+  row-gap: 2px;
   margin-bottom: var(--space);
 }
-.sign-out { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-.sign-out p { margin: 0; }
-/* The shared-computer hint wraps under the button, so the name, badge and Sign out fit next to the menu */
-.sign-out .hint-text { max-width: 230px; text-align: right; }
+.dashboard-header .brand { grid-area: brand; margin: 0; }
+.header-user,
+.sign-out { display: contents; }
+.sign-out button { grid-area: signout; }
+.sign-out p { grid-area: hint; justify-self: end; margin: 0; }
+/* Narrow screens: logo, then the menu, then the name with Sign out, then the hint */
+@media (max-width: 899px) {
+  .dashboard-header {
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "brand brand" "nav nav" "user signout" "hint hint";
+    row-gap: 8px;
+  }
+}
 
 /* The menu for the user's role (FR-008), next to the name; the link of the current page is "active" */
-.main-nav { flex: 1 1 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; align-self: center; }
+.main-nav { grid-area: nav; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 .nav-link {
   padding: 8px 12px;
   border-radius: var(--radius);
@@ -114,7 +127,7 @@ h2 { font-size: 1.1rem; }
 }
 .nav-link:hover { background: var(--color-primary-light); }
 .nav-link.active { background: var(--color-primary); color: var(--color-on-primary); }
-.header-user { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px; }
+
 
 /* The profile page (Increment 2 / SRS v1.4): read-only details, each with a short note */
 .profile-details { display: grid; grid-template-columns: max-content 1fr; gap: 10px 16px; margin: 0; }
@@ -124,7 +137,7 @@ h2 { font-size: 1.1rem; }
   .profile-details { grid-template-columns: 1fr; gap: 2px; }
   .profile-details dd { margin-bottom: 10px; }
 }
-.user-name { margin: 8px 0 0; font-weight: 600; }
+.user-name { grid-area: user; margin: 0; font-weight: 600; }
 .role-badge {
   display: inline-block;
   margin-left: 4px;

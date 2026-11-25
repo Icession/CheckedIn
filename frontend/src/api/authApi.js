@@ -23,9 +23,20 @@ export function getCurrentUser() {
   return apiGet('/api/auth/me')
 }
 
-/** First sign-in: saves the name, which creates the account (FR-003). Returns the current user. */
-export function saveName(firstName, lastName) {
-  return apiPost('/api/auth/name', { firstName, lastName })
+/**
+ * First sign-in: saves the name and the first password, which creates the account (FR-003; the password since
+ * Increment 2 / SRS v1.4). Returns the current user.
+ */
+export function saveName(firstName, lastName, password, confirmPassword) {
+  return apiPost('/api/auth/name', { firstName, lastName, password, confirmPassword })
+}
+
+/**
+ * Increment 2 / SRS v1.4: signs in with an email and password; the backend starts the same session cookie.
+ * Returns the current user. Throws status 401 ("Email or password is incorrect.") or 429 (too many wrong tries).
+ */
+export function signInWithPassword(email, password) {
+  return apiPost('/api/auth/password/sign-in', { email, password })
 }
 
 /** A student's first sign-in: links their student ID once (FR-005). Returns the current user. */
