@@ -256,6 +256,19 @@ cd frontend
 npm test                    # unit tests of the helper functions (Node's built-in test runner)
 ```
 
+## How we use Git branches
+
+`main` only gets finished increments. Nobody commits to `main` or straight to `develop`:
+
+1. **Feature branch:** each feature starts from `develop`, e.g. `git switch develop`, `git pull`,
+   `git switch -c feature/user-profile`. Documentation-only work uses `docs/...`.
+2. **Pull request into `develop`:** when the feature is done and tested, open a pull request into
+   `develop`, merge it with **Create a merge commit** (not squash or rebase), and delete the feature branch.
+3. **Release:** at the end of an increment, one pull request `develop` → `main` (e.g. "Increment 2
+   release"), also merged with **Create a merge commit**.
+
+`feature/room-layouts` holds unfinished Phase 3 work and is not merged until Phase 3 is done.
+
 ## Troubleshooting
 
 | Problem | Fix |
