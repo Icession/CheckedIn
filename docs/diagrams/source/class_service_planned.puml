@@ -4,11 +4,6 @@ skinparam nodesep 25
 skinparam ranksep 55
 
 package "Controllers (REST API)" #FAFAFA {
-  class LayoutController {
-    + createLayout(request)
-    + updateCells(layoutId, cells)
-    + listLayouts(roomName)
-  }
   class RosterController {
     + previewImport(sectionId, file)
     + autoArrange(sessionId, options)
@@ -25,10 +20,6 @@ package "Controllers (REST API)" #FAFAFA {
 }
 
 package "Services" #FAFAFA {
-  class LayoutService {
-    + saveLayout(email, request)
-    + numberWorkstations(layout)
-  }
   class ClassListImportService {
     + parse(file) : ImportPreview
     + confirm(sectionId, rows) : ImportResult
@@ -70,7 +61,6 @@ package "External Integration" #FAFAFA {
   class BrevoEmailService
 }
 
-LayoutController --> LayoutService
 RosterController --> ClassListImportService
 RosterController --> SeatArrangementService
 RosterController --> ExportService

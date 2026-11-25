@@ -51,6 +51,16 @@ export default function ProfessorDashboardPage() {
         </div>
         <SectionList sections={dashboard.sections} />
       </section>
+
+      <section className="card">
+        <div className="card-title-row">
+          <h2>Room layouts</h2>
+          <Link className="button-secondary" to="/professor/layouts">
+            Open room layouts
+          </Link>
+        </div>
+        <p className="hint-text">Draw each room or lab once, then use it for your in-person and hybrid sessions.</p>
+      </section>
     </main>
   )
 }

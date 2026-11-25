@@ -1,9 +1,11 @@
 // SessionForm — adds a weekly session to a section (FR-012): day, start and end time, lecture or
-// laboratory, how the class is held, and the room. The backend refuses overlaps and an end time
-// that is not later than the start (FR-013), and explains why.
+// laboratory, how the class is held, and where. In-person and hybrid sessions choose a room layout;
+// online and field sessions may type a place instead (FR-015). The backend refuses overlaps and an
+// end time that is not later than the start (FR-013), and explains why.
 import { useState } from 'react'
 import { addSession } from '../api/sectionApi.js'
-import { DAY_LABELS, DELIVERY_MODE_LABELS, SCHOOL_DAYS, SESSION_TYPE_LABELS } from '../utils/format.js'
+import LayoutSelect from './LayoutSelect.jsx'
+import { DAY_LABELS, DELIVERY_MODE_LABELS, SCHOOL_DAYS, SESSION_TYPE_LABELS, usesLayout } from '../utils/format.js'
 
 const EMPTY_SESSION = {
   dayOfWeek: 'MONDAY',
@@ -12,9 +14,18 @@ const EMPTY_SESSION = {
   sessionType: 'LECTURE',
   deliveryMode: 'IN_PERSON',
   roomName: '',
+  layoutId: '',
 }
 
-export default function SessionForm({ sectionId, onAdded }) {
+// The JSON for the backend: a layout for in-person and hybrid sessions, a typed place for the others
+function toAddRequest(session) {
+  const { layoutId, roomName, ...times } = session
+  return usesLayout(session.deliveryMode)
+    ? { ...times, roomName: null, layoutId: layoutId === '' ? null : Number(layoutId) }
+    : { ...times, roomName, layoutId: null }
+}
+
+export default function SessionForm({ sectionId, layouts, onAdded }) {
   const [session, setSession] = useState(EMPTY_SESSION)
   const [error, setError] = useState('')
   const [isSaving, setIsSaving] = useState(false)
@@ -28,7 +39,7 @@ export default function SessionForm({ sectionId, onAdded }) {
     setError('')
     setIsSaving(true)
     try {
-      onAdded(await addSession(sectionId, session))
+      onAdded(await addSession(sectionId, toAddRequest(session)))
       setSession(EMPTY_SESSION)
     } catch (addError) {
       // For example "This overlaps IT342 G01 (lecture, Thursday 6:00 PM - 9:00 PM)..."
@@ -80,10 +91,22 @@ export default function SessionForm({ sectionId, onAdded }) {
             ))}
           </select>
         </div>
-        <div className="field">
-          <label htmlFor="roomName">Room (optional)</label>
-          <input id="roomName" name="roomName" placeholder="NGE207" value={session.roomName} onChange={updateField} />
-        </div>
+        {usesLayout(session.deliveryMode) ? (
+          <div className="field">
+            <label htmlFor="layoutId">Room layout</label>
+            <LayoutSelect
+              id="layoutId"
+              value={session.layoutId}
+              layouts={layouts}
+              onChange={(layoutId) => setSession({ ...session, layoutId })}
+            />
+          </div>
+        ) : (
+          <div className="field">
+            <label htmlFor="roomName">Place (optional)</label>
+            <input id="roomName" name="roomName" placeholder="Cebu IT Park" maxLength={30} value={session.roomName} onChange={updateField} />
+          </div>
+        )}
       </div>
       <button type="submit" className="button-primary" disabled={isSaving}>
         {isSaving ? 'Adding…' : 'Add session'}

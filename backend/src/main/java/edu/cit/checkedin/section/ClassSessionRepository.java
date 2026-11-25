@@ -11,12 +11,14 @@ import edu.cit.checkedin.auth.User;
 
 /**
  * Database queries for weekly sessions. Covers FR-016 (today's sessions on the dashboard).
+ * "JOIN FETCH" loads the section and the layout (for the room name) in the same query.
  */
 public interface ClassSessionRepository extends JpaRepository<ClassSession, Long> {
 
     // FR-016: the professor's sessions on one weekday, in active sections only, earliest first
     @Query("""
             SELECT session FROM ClassSession session JOIN FETCH session.section section
+            LEFT JOIN FETCH session.layout
             WHERE section.professor = :professor
               AND section.archived = false
               AND session.dayOfWeek = :day

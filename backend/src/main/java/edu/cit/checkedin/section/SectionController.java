@@ -18,12 +18,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.cit.checkedin.section.dto.AddSessionRequest;
+import edu.cit.checkedin.section.dto.ChooseLayoutRequest;
 import edu.cit.checkedin.section.dto.SaveSectionRequest;
 import edu.cit.checkedin.section.dto.SectionResponse;
 import edu.cit.checkedin.section.dto.SessionResponse;
 
 /**
- * REST endpoints for a professor's sections and their weekly sessions. Covers FR-010 – FR-013.
+ * REST endpoints for a professor's sections and their weekly sessions. Covers FR-010 – FR-013 and FR-015.
  * Only professors may call them (SecurityConfig); the services check that the section is the
  * professor's own. All rules live in SectionService and ClassSessionService.
  *
@@ -33,6 +34,7 @@ import edu.cit.checkedin.section.dto.SessionResponse;
  * PUT    /api/professor/sections/{id}                  -> edit a section
  * POST   /api/professor/sections/{id}/archive          -> archive (read-only, hidden; permanent)
  * POST   /api/professor/sections/{id}/sessions         -> add a weekly session
+ * PUT    /api/professor/sections/{id}/sessions/{sid}/layout -> choose or change a session's room layout
  * DELETE /api/professor/sections/{id}/sessions/{sid}   -> remove a weekly session
  */
 @RestController
@@ -80,6 +82,12 @@ public class SectionController {
     public SessionResponse addSession(@PathVariable("sectionId") Long sectionId,
                                       @Valid @RequestBody AddSessionRequest request, Authentication authentication) {
         return classSessionService.addSession(authentication.getName(), sectionId, request);
+    }
+
+    @PutMapping("/{sectionId}/sessions/{sessionId}/layout")
+    public SessionResponse chooseLayout(@PathVariable("sectionId") Long sectionId, @PathVariable("sessionId") Long sessionId,
+                                        @Valid @RequestBody ChooseLayoutRequest request, Authentication authentication) {
+        return classSessionService.chooseLayout(authentication.getName(), sectionId, sessionId, request.layoutId());
     }
 
     @DeleteMapping("/{sectionId}/sessions/{sessionId}")

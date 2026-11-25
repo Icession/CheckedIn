@@ -20,7 +20,7 @@ import edu.cit.checkedin.section.SessionType;
  * @param hours        e.g. 3.0
  * @param sessionType  LECTURE or LABORATORY
  * @param deliveryMode IN_PERSON, ONLINE, HYBRID or FIELD
- * @param roomName     e.g. NGE207, or null
+ * @param roomName     the layout's room name, e.g. NGE207, or the typed room name, or null
  */
 public record TodaySessionResponse(Long sessionId, Long sectionId, String subjectCode, String subjectTitle,
                                    String sectionCode, LocalTime startTime, LocalTime endTime, double hours,
@@ -30,6 +30,6 @@ public record TodaySessionResponse(Long sessionId, Long sectionId, String subjec
         CourseSection section = session.getSection();
         return new TodaySessionResponse(session.getSessionId(), section.getSectionId(), section.getSubjectCode(),
                 section.getSubjectTitle(), section.getSectionCode(), session.getStartTime(), session.getEndTime(),
-                session.getHours(), session.getSessionType(), session.getDeliveryMode(), session.getRoomName());
+                session.getHours(), session.getSessionType(), session.getDeliveryMode(), session.currentRoomName());
     }
 }

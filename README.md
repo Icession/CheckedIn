@@ -239,6 +239,9 @@ To check the setup, open http://localhost:5173/setup. You should see **Backend: 
 ```bash
 cd backend
 .\mvnw.cmd test
+
+cd frontend
+npm test                    # unit tests of the helper functions (Node's built-in test runner)
 ```
 
 ## Troubleshooting
@@ -273,3 +276,6 @@ cd backend
 | The table editor refuses a `student_number` with `users_student_number_format` | The database only accepts a real NULL or an ID in the format `00-0000-000` (a CHECK rule, so a typed `NULL` can't be saved as text). To empty the cell, use **Set to NULL** instead of typing |
 | A student sees "This student ID is already linked to another account" | Another account already uses that ID. In the Supabase table viewer, search `users` for that `student_number` to see which account has it |
 | The table editor refuses a class session with `class_sessions_day_monday_to_saturday` or `class_sessions_end_after_start` | The database only accepts sessions from `MONDAY` to `SATURDAY` (in capital letters, full names) whose `end_time` is later than the `start_time` (CHECK rules, FR-012, FR-013). Add or remove sessions on the section page instead |
+| The table editor refuses a change with `class_sessions_layout_only_in_person_or_hybrid` | Only in-person and hybrid sessions may have a `layout_id` (FR-015). Choose layouts on the section page instead |
+| The table editor refuses a seat with `seats_unique_label_per_layout`, `seats_label_only_on_usable_cells` or `seats_one_cell_per_spot` | One layout can't use the same seat number twice, only seats and workstations have a number, and each grid spot has one cell (FR-018, FR-019). Change layouts in the layout builder (**Room layouts** on the professor dashboard) instead |
+| "There is already a layout for NGE207" | Room names are unique and layouts are shared (FR-021). Search for the room under **Room layouts** and use that layout for your sessions; only the professor who drew it can change it |

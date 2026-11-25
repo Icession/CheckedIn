@@ -21,7 +21,14 @@ package "Controllers (REST API)" #FAFAFA {
     + updateSection(sectionId, request)
     + archiveSection(sectionId)
     + addSession(sectionId, request)
+    + chooseLayout(sectionId, sessionId, request)
     + removeSession(sectionId, sessionId)
+  }
+  class LayoutController {
+    + searchLayouts(search)
+    + createLayout(request)
+    + getLayout(layoutId)
+    + saveLayout(layoutId, request)
   }
   class ProfessorDashboardController {
     + getDashboard()
@@ -67,6 +74,7 @@ package "Services" #FAFAFA {
   }
   class ClassSessionService {
     + addSession(email, sectionId, request)
+    + chooseLayout(email, sectionId, sessionId, layoutId)
     + removeSession(email, sectionId, sessionId)
   }
   class SessionScheduleChecker {
@@ -76,6 +84,17 @@ package "Services" #FAFAFA {
   }
   class ProfessorDashboardService {
     + getDashboard(email)
+  }
+  class LayoutService {
+    + searchLayouts(email, searchText)
+    + getLayout(email, layoutId)
+    + createLayout(email, request)
+    + saveLayout(email, layoutId, request)
+    + findLayout(layoutId) : RoomLayout
+  }
+  class LayoutGridChecker {
+    + checkGridSize(request)
+    + checkNoDuplicateNumbers(cells)
   }
 }
 
@@ -105,6 +124,9 @@ SectionController --> SectionService
 SectionController --> ClassSessionService
 ClassSessionService --> SectionService
 ClassSessionService --> SessionScheduleChecker
+ClassSessionService --> LayoutService
+LayoutController --> LayoutService
+LayoutService --> LayoutGridChecker
 SectionService --> SessionScheduleChecker
 ProfessorDashboardController --> ProfessorDashboardService
 ProfessorDashboardService --> SectionService

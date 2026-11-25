@@ -7,6 +7,11 @@ export const SESSION_TYPE_LABELS = { LECTURE: 'Lecture', LABORATORY: 'Laboratory
 
 export const DELIVERY_MODE_LABELS = { IN_PERSON: 'In person', ONLINE: 'Online', HYBRID: 'Hybrid', FIELD: 'Field' }
 
+/** FR-015: in-person and hybrid sessions are held in a room with a layout; online and field ones are not. */
+export function usesLayout(deliveryMode) {
+  return deliveryMode === 'IN_PERSON' || deliveryMode === 'HYBRID'
+}
+
 // Classes are Monday to Saturday (the backend refuses Sunday)
 export const SCHOOL_DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY']
 
@@ -45,4 +50,16 @@ export function currentSchoolYear(today = new Date()) {
   const year = today.getFullYear()
   const startsThisYear = today.getMonth() >= 5 // June or later
   return startsThisYear ? `${year}-${year + 1}` : `${year - 1}-${year}`
+}
+
+// Times are shown in Philippine time (NFR-035), whatever the computer's own time zone
+const PHILIPPINE_TIME = { timeZone: 'Asia/Manila' }
+
+/** "11:40 AM" for a time today, "Nov 18, 11:40 AM" for another day (e.g. when unsaved work was kept). */
+export function formatTimeOfDay(isoTime, now = new Date()) {
+  const time = new Date(isoTime)
+  const clock = time.toLocaleTimeString('en-US', { ...PHILIPPINE_TIME, hour: 'numeric', minute: '2-digit' })
+  const day = (date) => date.toLocaleDateString('en-US', PHILIPPINE_TIME)
+  if (day(time) === day(now)) return clock
+  return `${time.toLocaleDateString('en-US', { ...PHILIPPINE_TIME, month: 'short', day: 'numeric' })}, ${clock}`
 }

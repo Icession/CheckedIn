@@ -27,8 +27,8 @@ The use case diagram is drawn by `uc_svg.py` (Python 3, no extra libraries). It 
 | `act_attendance.puml` | `activity-attendance.png` | 6. Activity: check attendance |
 | `act_excuse.puml` | `activity-excuse.png` | 7. Activity: excuses |
 | `class_domain.puml` | `class-domain.png` | 8. Class: domain model |
-| `class_service.puml` | `class-services.png` | 9. Class: built (Phases 1–2) |
-| `class_service_planned.puml` | `class-services-planned.png` | 10. Class: planned (Phases 3–11) |
+| `class_service.puml` | `class-services.png` | 9. Class: built (Phases 1–3) |
+| `class_service_planned.puml` | `class-services-planned.png` | 10. Class: planned (Phases 4–11) |
 | `seq_signin.puml` | `sequence-signin.png` | 11. Sequence: sign in and sign out |
 | `seq_attendance.puml` | `sequence-attendance.png` | 12. Sequence: attendance |
 | `seq_excuse.puml` | `sequence-excuse.png` | 13. Sequence: excuses |

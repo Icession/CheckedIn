@@ -1,8 +1,9 @@
-// SectionPage — one section at /professor/sections/:sectionId (FR-010 – FR-014): its details,
-// its weekly sessions with their hours, adding and removing sessions, editing and archiving.
+// SectionPage — one section at /professor/sections/:sectionId (FR-010 – FR-015): its details,
+// its weekly sessions with their hours and room layouts, adding and removing sessions, editing and archiving.
 // An archived section is shown read-only (FR-011).
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { searchLayouts } from '../api/layoutApi.js'
 import { archiveSection, getSection, removeSession } from '../api/sectionApi.js'
 import PageHeader from '../components/PageHeader.jsx'
 import SessionForm from '../components/SessionForm.jsx'
@@ -15,6 +16,7 @@ export default function SectionPage() {
   const [section, setSection] = useState(null)
   const [loadError, setLoadError] = useState('')
   const [actionError, setActionError] = useState('')
+  const [layouts, setLayouts] = useState([])
 
   const loadSection = useCallback(() => {
     getSection(sectionId)
@@ -25,6 +27,13 @@ export default function SectionPage() {
   useEffect(() => {
     loadSection()
   }, [loadSection])
+
+  // FR-015, FR-021: every professor's layouts, for the "Room layout" lists of the sessions
+  useEffect(() => {
+    searchLayouts('')
+      .then(setLayouts)
+      .catch((error) => setActionError(error.message))
+  }, [])
 
   async function handleRemove(session) {
     const when = `${DAY_LABELS[session.dayOfWeek]} ${formatTimeRange(session.startTime, session.endTime)}`
@@ -82,9 +91,16 @@ export default function SectionPage() {
 
           <section className="card">
             <h2>Weekly sessions</h2>
-            <SessionList sessions={section.sessions} canRemove={!section.archived} onRemove={handleRemove} />
+            <SessionList
+              sectionId={section.sectionId}
+              sessions={section.sessions}
+              layouts={layouts}
+              canChange={!section.archived}
+              onRemove={handleRemove}
+              onLayoutChosen={loadSection}
+            />
             {actionError && <p className="error-text" role="alert">{actionError}</p>}
-            {!section.archived && <SessionForm sectionId={section.sectionId} onAdded={loadSection} />}
+            {!section.archived && <SessionForm sectionId={section.sectionId} layouts={layouts} onAdded={loadSection} />}
           </section>
 
           {!section.archived && (

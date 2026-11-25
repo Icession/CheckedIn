@@ -24,7 +24,25 @@
   --status-absent: #d94141;  /* red    — A */
   --status-excused: #3b7ddd; /* blue   — E */
 
+  /* Layout cells (FR-018). Kept away from the attendance colors above, so the seat map
+     can later show P / L / A / E on top of them without confusion */
+  --cell-seat: #ece8f7;              /* light violet */
+  --cell-seat-border: #8a7bc0;
+  --cell-workstation: #e3e7ee;       /* light slate */
+  --cell-workstation-border: #5b6b84;
+  --cell-table: #b98a5e;             /* wood brown */
+  --cell-table-border: #8c6239;
+  --cell-aisle: #f0f2f5;             /* almost the page background */
+  --cell-no-chair-border: #b8c0cc;
+  --color-front: #4b5563;            /* the "Front of room" bar (FR-023) */
+  --cell-problem: #fde2e2;           /* a seat whose number is used twice (FR-019) */
+  --cell-problem-border: #c62828;
+  --cell-unnumbered: #b45309;        /* dashed outline of a seat with no number yet */
+  --shadow-raised: 0 -4px 12px rgba(31, 41, 55, 0.08); /* the builder's bottom bar, above the page */
+
   /* Sizes */
+  --cell-size: 44px;                 /* one square of a layout grid (fits labels like PC-15) */
+  --side-panel-width: 300px;         /* the layout builder's side panel (legend or numbering) */
   --radius: 10px;
   --space: 16px;
   --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;

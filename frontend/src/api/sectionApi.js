@@ -27,11 +27,17 @@ export function archiveSection(sectionId) {
 }
 
 /**
- * Adds a weekly session (FR-012, FR-013):
- * { dayOfWeek, startTime, endTime, sessionType, deliveryMode, roomName }.
+ * Adds a weekly session (FR-012, FR-013, FR-015):
+ * { dayOfWeek, startTime, endTime, sessionType, deliveryMode, roomName, layoutId }.
+ * In-person and hybrid sessions need a layoutId; online and field sessions may have a roomName instead.
  */
 export function addSession(sectionId, session) {
   return apiPost(`/api/professor/sections/${sectionId}/sessions`, session)
+}
+
+/** Chooses or changes the room layout of an in-person or hybrid session (FR-015). */
+export function chooseSessionLayout(sectionId, sessionId, layoutId) {
+  return apiPut(`/api/professor/sections/${sectionId}/sessions/${sessionId}/layout`, { layoutId })
 }
 
 /** Removes a weekly session from a section. */

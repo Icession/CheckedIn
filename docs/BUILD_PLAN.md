@@ -84,9 +84,35 @@ Ask Claude Code: *"Start Phase 2 from docs/BUILD_PLAN.md."*
 - [ ] `RoomLayout` and `Seat` entities, `CellType` enum (SEAT, WORKSTATION, TABLE, AISLE, NO_CHAIR)
 - [ ] Layout builder page: set rows/columns, paint cells with a tool palette
 - [ ] Auto-number workstations, no duplicates (FR-019)
+- [ ] Auto-number: prefix (e.g. "PC-"), start number, reading or snake order, all seats or only the
+      selected cells; labels are plain numbers (PC-1, not PC-01); duplicates refused when typed and shown in red (FR-019)
+- [ ] "Apply to" (workstations / seats / both, each with its own prefix), two numbers per type: "Start at"
+      (set only by the professor; Auto-number of all cells starts there, so it gives the same result every time)
+      and "Next" (the counter for dragging and for numbering a selected block; afterwards last number + 1)
+- [ ] Numbering by dragging the Number tool as a renumbering brush: each cell once per drag; untouched seats of
+      the same type give up their label and are marked; the other type's labels block (FR-019)
+- [ ] Changing the room size (live: 400 ms after typing stops, at once with the ▲▼ arrows) continues the pattern
+      of cells and renumbers every seat from Start at, as one undo step; no old labels come back as duplicates
+- [ ] Numbering order: "Start from" a corner (front/back row, left/right side of the screen) and "Direction"
+      (same direction or snake)
+- [ ] The room is shown from the teacher's desk: turned around, the front row at the bottom next to the board
+      bar. Only the drawing turns; stored rows and columns stay the same (row 0 = front)
+- [ ] Unsaved work kept in this browser (localStorage) and offered after a refresh (Restore / Discard);
+      a warning before closing, reloading or following a link while there are unsaved changes
+- [ ] Select tool that selects or unselects by dragging (Esc clears), keyboard shortcuts Q W E R T A S and Z to undo
+- [ ] Builder layout: one toolbar, the grid with a side panel (legend and counts, or numbering),
+      a bottom bar with Save, Undo and the one message spot that stays visible; the side panel moves below the grid on phones
+
+> FR-019 now covers numbering with a prefix (e.g. PC-1 … PC-56), separate numbering for seats and
+> workstations, numbering by dragging, and renumbering when the room size changes. Update the FR-019
+> wording in the SRS after Phase 3.
 - [ ] Usable seat count, only SEAT and WORKSTATION (FR-020)
 - [ ] Reuse layouts by room name; only the creator edits (FR-021)
-- [ ] Link in-person and hybrid sessions to a layout (FR-015)
+- [ ] Link in-person and hybrid sessions to a layout (FR-015); older sessions get a "Choose layout" action
+- [ ] "Front of room" marker above the grid (FR-023)
+
+> FR-022 (warn before a layout change removes a seat with a student) moved to Phase 5, because
+> there are no seat assignments yet. Seats keep their `seat_id` when a layout is edited, so Phase 5 can add it.
 
 Done when: you can draw NGE207 as a lab and GLE201 as a lecture room with tables.
 
@@ -113,6 +139,8 @@ Done when: importing a 42-row Excel file shows a preview and saves only valid ro
 - [ ] `SeatArrangementService`: alphabetical by last name, 4 corners × 2 directions,
       skip TABLE, AISLE, NO_CHAIR; extra students go to "Unassigned"
 - [ ] Unit tests for all 8 corner/direction combinations
+- [ ] Warn before a layout change removes a seat that has a student, and move that student to
+      "Unassigned" if the professor confirms (FR-022). Moved here from Phase 3
 
 Done when: one click arranges a section A–Z from the corner you choose.
 

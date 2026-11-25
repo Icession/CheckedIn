@@ -18,11 +18,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import edu.cit.checkedin.layout.RoomLayout;
+
 /**
  * One weekly meeting time of a section, e.g. "Thursday 6:00 PM - 9:00 PM, lecture, in person".
  * One row in the "class_sessions" table (see the ERD). Covers FR-012 (day, times, type, delivery
- * mode, room), FR-013 (overlap check) and FR-014 (length in hours).
- * The link to a room layout (layout_id) is added in Phase 3.
+ * mode, room), FR-013 (overlap check), FR-014 (length in hours) and FR-015 (room layout).
  */
 @Entity
 @Table(name = "class_sessions")
@@ -31,6 +32,9 @@ import jakarta.persistence.Table;
 @Check(name = "class_sessions_day_monday_to_saturday",
         constraints = "day_of_week IN ('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY')")
 @Check(name = "class_sessions_end_after_start", constraints = "end_time > start_time")
+// FR-015: online and field sessions never have a room layout
+@Check(name = "class_sessions_layout_only_in_person_or_hybrid",
+        constraints = "layout_id IS NULL OR delivery_mode IN ('IN_PERSON', 'HYBRID')")
 public class ClassSession {
 
     @Id
@@ -61,9 +65,15 @@ public class ClassSession {
     @Column(name = "delivery_mode", length = 10, nullable = false)
     private DeliveryMode deliveryMode;
 
-    // Optional, e.g. "NGE207"; online and field sessions usually have none
+    // Typed room name, only for sessions without a layout (e.g. a field trip site); a session with a
+    // layout takes its room name from the layout, so renaming the layout renames it everywhere
     @Column(name = "room_name", length = 30)
     private String roomName;
+
+    // FR-015: the seat map of an in-person or hybrid session; empty for online and field sessions
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "layout_id")
+    private RoomLayout layout;
 
     /** Empty constructor required by JPA. Our own code uses the constructor below. */
     protected ClassSession() {
@@ -92,6 +102,22 @@ public class ClassSession {
     /** FR-015: in-person and hybrid sessions need a room layout (seat map); online and field ones don't. */
     public boolean needsLayout() {
         return deliveryMode == DeliveryMode.IN_PERSON || deliveryMode == DeliveryMode.HYBRID;
+    }
+
+    /** FR-015: true for an in-person or hybrid session that has no room layout yet (e.g. made before Phase 3). */
+    public boolean isMissingLayout() {
+        return needsLayout() && layout == null;
+    }
+
+    /** FR-015: links the session to a layout; its room name now comes from the layout. */
+    public void chooseLayout(RoomLayout newLayout) {
+        this.layout = newLayout;
+        this.roomName = null;
+    }
+
+    /** The room to show: the layout's room name, or the typed room name for sessions without a layout. */
+    public String currentRoomName() {
+        return (layout != null) ? layout.getRoomName() : roomName;
     }
 
     /**
@@ -141,5 +167,9 @@ public class ClassSession {
 
     public String getRoomName() {
         return roomName;
+    }
+
+    public RoomLayout getLayout() {
+        return layout;
     }
 }

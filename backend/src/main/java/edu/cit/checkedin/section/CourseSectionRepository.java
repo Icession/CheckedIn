@@ -14,6 +14,6 @@ public interface CourseSectionRepository extends JpaRepository<CourseSection, Lo
 
     // A professor's active (or archived) sections, with their sessions loaded in the same query,
     // because the overlap check (FR-013) needs every session at once
-    @EntityGraph(attributePaths = "sessions")
+    @EntityGraph(attributePaths = {"sessions", "sessions.layout"})
     List<CourseSection> findByProfessorAndArchived(User professor, boolean archived);
 }

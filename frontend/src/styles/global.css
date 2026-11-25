@@ -132,6 +132,195 @@ a.button-secondary { display: inline-block; text-decoration: none; }
 a.item-row:hover { border-color: var(--color-primary); background: var(--color-primary-light); }
 .button-link--danger { color: var(--status-absent); }
 
+.list-spacing { margin-top: var(--space); }
+
+/* ---------- Layout builder (FR-017 – FR-023) ---------- */
+/* One toolbar: cell types | Number, Select | Undo */
+.builder-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.toolbar-group { display: flex; flex-wrap: wrap; gap: 4px; }
+.toolbar-group + .toolbar-group { padding-left: 8px; border-left: 1px solid var(--color-border); }
+/* On phones the groups wrap onto new lines, where a divider line would look odd */
+@media (max-width: 600px) {
+  .toolbar-group + .toolbar-group { padding-left: 0; border-left: none; }
+}
+.tool-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.tool-button:disabled { opacity: 0.5; cursor: not-allowed; }
+/* The active tool: filled, with a thick border */
+.tool-button--selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  box-shadow: inset 0 0 0 1px var(--color-primary);
+  font-weight: 600;
+}
+.tool-swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.tool-swatch--number { border-color: var(--color-primary); color: var(--color-primary); }
+.tool-swatch--select { border: 2px dashed var(--color-primary); }
+/* The keyboard key of a tool, e.g. "Q" */
+.tool-key {
+  padding: 0 5px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+/* The one short hint under the toolbar */
+.builder-hint { margin: 8px 0 var(--space); color: var(--color-text-muted); font-size: 0.9rem; }
+
+/* The grid on the left (most of the width), the side panel on the right; on narrow screens the panel goes below */
+.builder-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--side-panel-width);
+  gap: var(--space);
+  align-items: start;
+}
+@media (max-width: 860px) {
+  .builder-main { grid-template-columns: minmax(0, 1fr); }
+}
+.builder-side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space);
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+}
+.builder-side-panel p { margin: 0; }
+.numbering-panel { margin: 0; padding: 0; border: none; min-width: 0; }
+.numbering-panel legend { padding: 0; margin-bottom: 4px; font-weight: 600; }
+.numbering-panel .button-secondary { align-self: flex-start; }
+.numbering-preview { margin: 0; padding-left: 18px; }
+.radio-group { display: flex; flex-direction: column; gap: 6px; }
+/* One type's prefix and Start at, kept together */
+.numbering-type { padding: 8px 0; border-top: 1px solid var(--color-border); }
+.field-title { font-weight: 600; }
+.form label.radio-option { display: flex; align-items: flex-start; gap: 8px; font-weight: 400; }
+.form .radio-option input { margin: 3px 0 0; padding: 0; }
+.layout-legend h3 { margin: 0 0 8px; }
+.legend-list { display: flex; flex-direction: column; gap: 6px; margin: 0 0 8px; padding: 0; list-style: none; }
+.legend-list li { display: flex; align-items: center; gap: 8px; }
+.legend-count { margin-left: auto; }
+.legend-unnumbered { display: flex; align-items: center; gap: 8px; }
+.legend-swatch--unnumbered { border: 2px dashed var(--cell-unnumbered); }
+.legend-total {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border);
+}
+
+/* Save, "unsaved changes", Undo and the one message spot stay at the bottom of the screen while scrolling */
+.builder-bottom-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: var(--space);
+  padding: 12px var(--space);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-raised);
+}
+.bottom-bar-message { flex-basis: 100%; margin: 0; }
+
+/* Scrolls sideways on small screens instead of squeezing the cells (NFR-018) */
+.layout-scroll { overflow-x: auto; padding-bottom: 8px; }
+.layout-map { display: flex; flex-direction: column; align-items: center; gap: 8px; width: max-content; min-width: 100%; }
+.layout-front {
+  align-self: stretch;
+  padding: 6px;
+  border-radius: var(--radius);
+  background: var(--color-front);
+  color: var(--color-on-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+}
+.layout-grid { display: grid; gap: 4px; user-select: none; }
+
+/* One square of the grid. Each type has its own color AND shape or letter, so it is clear without color */
+.layout-cell {
+  width: var(--cell-size);
+  height: var(--cell-size);
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  overflow: hidden;
+  cursor: pointer;
+}
+.layout-cell:disabled { cursor: default; color: var(--color-text); }
+.layout-cell--seat { background: var(--cell-seat); border-color: var(--cell-seat-border); border-radius: 50% 50% 6px 6px; }
+.layout-cell--workstation { background: var(--cell-workstation); border-color: var(--cell-workstation-border); }
+.layout-cell--table { background: var(--cell-table); border-color: var(--cell-table-border); color: var(--color-on-primary); }
+.layout-cell--aisle { background: var(--cell-aisle); }
+.layout-cell--no-chair { background: var(--color-surface); border: 2px dashed var(--cell-no-chair-border); color: var(--color-text-muted); }
+/* A seat or workstation without a number yet: dashed outline, so it is easy to find and number */
+.layout-cell--no-number.layout-cell--seat,
+.layout-cell--no-number.layout-cell--workstation {
+  color: var(--color-text-muted);
+  outline: 2px dashed var(--cell-unnumbered);
+  outline-offset: 1px;
+}
+.layout-cell--table:disabled { color: var(--color-on-primary); }
+.layout-cell--selected { outline: 3px solid var(--color-primary); outline-offset: 1px; }
+.layout-cell--in-selection { box-shadow: inset 0 0 0 3px var(--color-primary); }
+.layout-cell--duplicate,
+.layout-cell--duplicate.layout-cell--no-number {
+  background: var(--cell-problem);
+  border-color: var(--cell-problem-border);
+  color: var(--cell-problem-border);
+}
+
+/* The "Choose layout" form inside a session row (FR-015) */
+.session-layout-form { align-self: stretch; margin-top: 8px; }
+
+/* "You have unsaved changes from 11:40 AM. Restore / Discard." (work kept in this browser) */
+.restore-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: var(--space);
+  padding: 12px var(--space);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius);
+  background: var(--color-primary-light);
+}
+.restore-bar span { flex: 1 1 260px; font-weight: 600; }
+
 /* A short note, for example "This section is archived" */
 .notice-banner { padding: 8px 12px; border-radius: var(--radius); background: var(--color-primary-light); }
 
