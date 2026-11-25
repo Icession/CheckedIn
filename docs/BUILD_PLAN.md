@@ -102,17 +102,17 @@ Requirement IDs: "Increment 2 / SRS v1.4" until the SRS v1.4 numbers are final.
       account without a password; 5 wrong passwords for one email -> password sign-in blocked for 15 minutes
       (`password_lockouts`, numbers in application.properties); the same 8-hour session as the other methods.
       Also: role hints on the profile, and the header on one centred line with a one-line GitHub hint.
-- [ ] Steps 3 + 4 – `feature/password-reset-and-change` (one branch):
-  - [ ] "Forgot password?" on the sign-in page -> `/forgot-password`: always the same answer ("If that email has an
+- [x] Steps 3 + 4 – `feature/password-reset-and-change` (one branch):
+  - [x] "Forgot password?" on the sign-in page -> `/forgot-password`: always the same answer ("If that email has an
         account, we sent a reset link"). Brevo email with a single-use link to `/reset-password?token=…`:
         `password_reset_tokens` stores only the SHA-256 hash of a random 256-bit token, 30 minutes, at most 3 links
         per 15 minutes per email (silently). Using a link saves the new password, uses up every open link of that
         user and lifts a lockout; used, expired or unknown links get clear messages. This is also how accounts
         from before Increment 2 set their first password.
-  - [ ] Change password on the profile page: current password (BCrypt check), new + confirm (same rules, must
+  - [x] Change password on the profile page: current password (BCrypt check), new + confirm (same rules, must
         differ from the current one). Afterwards the old password no longer works, open reset links are used up,
         and the session stays. Accounts without a password see "Set a password" (link to "Forgot password?").
-  - [ ] Profile shows the student ID only for students (a professor's leftover student ID is hidden).
+  - [x] Profile shows the student ID only for students (a professor's leftover student ID is hidden).
 - [ ] Release: one pull request `develop` → `main` ("Increment 2 release")
 
 ## Phase 3 — Room and lab layout builder (Feature 3: FR-017 – FR-023)
