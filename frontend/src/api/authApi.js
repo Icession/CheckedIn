@@ -39,6 +39,16 @@ export function signInWithPassword(email, password) {
   return apiPost('/api/auth/password/sign-in', { email, password })
 }
 
+/** Increment 2: "Forgot password?" asks for a reset link. Always answers the same (204), account or not. */
+export function requestPasswordReset(email) {
+  return apiPost('/api/auth/password/forgot', { email })
+}
+
+/** Increment 2: saves the new password from a reset link. Throws 400 with a clear message for a bad link. */
+export function resetPassword(token, newPassword, confirmPassword) {
+  return apiPost('/api/auth/password/reset', { token, newPassword, confirmPassword })
+}
+
 /** A student's first sign-in: links their student ID once (FR-005). Returns the current user. */
 export function linkStudentId(studentNumber) {
   return apiPost('/api/auth/link-student-id', { studentNumber })

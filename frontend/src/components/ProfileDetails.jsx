@@ -22,7 +22,7 @@ export default function ProfileDetails({ profile }) {
         </span>
       </dd>
 
-      {profile.studentNumber && (
+      {profile.role === 'STUDENT' && profile.studentNumber && (
         <>
           <dt>Student ID</dt>
           <dd>

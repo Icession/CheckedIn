@@ -35,6 +35,9 @@ package "Controllers (REST API)" #FAFAFA {
   }
   class PasswordController {
     + signIn(request)
+    + forgotPassword(request)
+    + resetPassword(request)
+    + changePassword(request)
   }
 }
 
@@ -92,6 +95,14 @@ package "Services" #FAFAFA {
   class PasswordSignInService {
     + signIn(email, password) : CurrentUserResponse
   }
+  class PasswordResetService {
+    + requestReset(email)
+    + resetPassword(request)
+    + useUpOpenLinks(user, now)
+  }
+  class PasswordChangeService {
+    + changePassword(email, request)
+  }
 }
 
 package "External Integration" #FAFAFA {
@@ -130,6 +141,12 @@ PasswordController --> PasswordSignInService
 PasswordController --> SessionService
 PasswordSignInService --> AuthService
 PasswordSignInService --> EmailAddressChecker
+PasswordController --> PasswordResetService
+PasswordController --> PasswordChangeService
+PasswordResetService --> EmailService
+PasswordResetService --> EmailAddressChecker
+PasswordChangeService --> AuthService
+PasswordChangeService --> PasswordResetService
 
 IdentityProvider <|.. GitHubIdentityProvider
 EmailService <|.. BrevoEmailService

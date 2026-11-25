@@ -94,7 +94,7 @@ Requirement IDs: "Increment 2 / SRS v1.4" until the SRS v1.4 numbers are final.
       apostrophes and periods ("Ma. Cristina", "Dela Cruz"). `GET`/`PUT /api/profile` always use the
       signed-in user from the session (no user ID in the URL or body). One name rule for the profile and the
       first-sign-in name form (`NameRules`), now 50 characters for both (was 60 on the name form).
-- [ ] Step 2 – `feature/password-sign-in`: `users.password_hash` (BCrypt only; a database rule refuses anything
+- [x] Step 2 – `feature/password-sign-in`: `users.password_hash` (BCrypt only; a database rule refuses anything
       else; never in any response). Password rules in `PasswordRules` / `passwordRules.js`: 8–64 characters, a
       letter and a number, not the email, both boxes the same. The first-sign-in name form also asks for
       "Create a password" + "Confirm password" (email-code and GitHub sign-ups). "Sign in with password" on the
@@ -102,9 +102,17 @@ Requirement IDs: "Increment 2 / SRS v1.4" until the SRS v1.4 numbers are final.
       account without a password; 5 wrong passwords for one email -> password sign-in blocked for 15 minutes
       (`password_lockouts`, numbers in application.properties); the same 8-hour session as the other methods.
       Also: role hints on the profile, and the header on one centred line with a one-line GitHub hint.
-- [ ] Step 3 – `feature/forgot-password`: reset link by email (`password_reset_tokens`, SHA-256 hash only,
-      30 minutes, 3 requests per 15 minutes), `/forgot-password` and `/reset-password`
-- [ ] Step 4 – `feature/change-password`: on the profile page (current, new, confirm)
+- [x] Steps 3 + 4 – `feature/password-reset-and-change` (one branch):
+  - [x] "Forgot password?" on the sign-in page -> `/forgot-password`: always the same answer ("If that email has an
+        account, we sent a reset link"). Brevo email with a single-use link to `/reset-password?token=…`:
+        `password_reset_tokens` stores only the SHA-256 hash of a random 256-bit token, 30 minutes, at most 3 links
+        per 15 minutes per email (silently). Using a link saves the new password, uses up every open link of that
+        user and lifts a lockout; used, expired or unknown links get clear messages. This is also how accounts
+        from before Increment 2 set their first password.
+  - [x] Change password on the profile page: current password (BCrypt check), new + confirm (same rules, must
+        differ from the current one). Afterwards the old password no longer works, open reset links are used up,
+        and the session stays. Accounts without a password see "Set a password" (link to "Forgot password?").
+  - [x] Profile shows the student ID only for students (a professor's leftover student ID is hidden).
 - [ ] Release: one pull request `develop` → `main` ("Increment 2 release")
 
 ## Phase 3 — Room and lab layout builder (Feature 3: FR-017 – FR-023)

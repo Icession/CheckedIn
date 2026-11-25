@@ -105,7 +105,7 @@ class ProfileControllerTest {
     }
 
     private static ProfileResponse juansProfile(String firstName, String lastName) {
-        return new ProfileResponse(JUAN, firstName, lastName, Role.STUDENT, "22-1234-567", LocalDate.of(2026, 11, 10));
+        return new ProfileResponse(JUAN, firstName, lastName, Role.STUDENT, "22-1234-567", LocalDate.of(2026, 11, 10), true);
     }
 
     private static MockHttpSession signedInAs(String email) {

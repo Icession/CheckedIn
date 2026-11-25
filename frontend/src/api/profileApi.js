@@ -11,3 +11,8 @@ export function getProfile() {
 export function updateProfile(firstName, lastName) {
   return apiPut('/api/profile', { firstName, lastName })
 }
+
+/** Changes the signed-in user's password; throws with the backend's message, e.g. a wrong current password. */
+export function changePassword(currentPassword, newPassword, confirmPassword) {
+  return apiPut('/api/profile/password', { currentPassword, newPassword, confirmPassword })
+}
