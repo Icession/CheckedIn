@@ -21,6 +21,7 @@ entity "users" as users {
   * last_name : VARCHAR(60)
   * role : ENUM(PROFESSOR, STUDENT)
   student_number : CHAR(11) <<UQ>>
+  password_hash : VARCHAR(60)
   * created_at : TIMESTAMP
   last_login_at : TIMESTAMP
 }
@@ -34,6 +35,25 @@ entity "login_codes" as codes {
   * attempt_count : SMALLINT
   used_at : TIMESTAMP
   * created_at : TIMESTAMP
+}
+
+entity "password_reset_tokens" as resets {
+  * <b>token_id</b> : BIGINT <<PK>>
+  --
+  * user_id : BIGINT <<FK>>
+  * token_hash : VARCHAR(64) <<UQ>>
+  * expires_at : TIMESTAMP
+  used_at : TIMESTAMP
+  * created_at : TIMESTAMP
+}
+
+entity "password_lockouts" as lockouts {
+  * <b>lockout_id</b> : BIGINT <<PK>>
+  --
+  * email : VARCHAR(120)
+  * wrong_tries : INTEGER
+  last_wrong_try_at : TIMESTAMP
+  locked_until : TIMESTAMP
 }
 
 entity "course_sections" as sections {
@@ -156,6 +176,8 @@ entity "notification_logs" as notifs {
 
 users ||--o{ sections : "teaches"
 users -[hidden]right- codes
+codes -[hidden]down- lockouts
+users ||--o{ resets : "resets password with"
 users ||--o{ layouts : "creates"
 users |o--o{ enrollments : "linked to"
 users ||--o{ excuses : "submits"

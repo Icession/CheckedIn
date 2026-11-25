@@ -31,7 +31,7 @@ class SaveNameRequestTest {
 
     @Test
     void removesOuterSpacesAndSqueezesInnerSpaces() {
-        SaveNameRequest request = new SaveNameRequest("  Juan   Carlos ", " Dela   Cruz ");
+        SaveNameRequest request = new SaveNameRequest("  Juan   Carlos ", " Dela   Cruz ", "sunflower42", "sunflower42");
 
         assertThat(request.firstName()).isEqualTo("Juan Carlos");
         assertThat(request.lastName()).isEqualTo("Dela Cruz");
@@ -51,14 +51,48 @@ class SaveNameRequestTest {
     }
 
     @Test
-    void allowsSixtyCharactersButNotSixtyOne() {
-        assertThat(problemsWith("A".repeat(60), "Cruz")).isEmpty();
-        assertThat(problemsWith("A".repeat(61), "Cruz"))
-                .containsExactly("Your first name can have at most 60 characters.");
+    void allowsFiftyCharactersButNotFiftyOne() {
+        assertThat(problemsWith("A".repeat(50), "Cruz")).isEmpty();
+        assertThat(problemsWith("A".repeat(51), "Cruz"))
+                .containsExactly("Your first name can have at most 50 characters.");
+    }
+
+    // ---------- Increment 2 / SRS v1.4: the first password ----------
+
+    @ParameterizedTest
+    @ValueSource(strings = {"sunflower42", "Ñandú2026", "a1b2c3d4", "correct horse battery 9"})
+    void acceptsPasswordsWithAtLeastEightCharactersALetterAndANumber(String password) {
+        assertThat(passwordProblems(password, password)).isEmpty();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"short1", "abcdefgh", "12345678", "        "})
+    void refusesShortPasswordsAndPasswordsWithoutALetterOrANumber(String password) {
+        assertThat(passwordProblems(password, password)).containsExactly(
+                "Your password needs at least 8 characters, with at least one letter and one number.");
+    }
+
+    @Test
+    void allowsSixtyFourCharactersButNotSixtyFive() {
+        String sixtyFour = "a1" + "x".repeat(62);
+        assertThat(passwordProblems(sixtyFour, sixtyFour)).isEmpty();
+        assertThat(passwordProblems(sixtyFour + "x", "x")).containsExactly("Your password can have at most 64 characters.");
+    }
+
+    @Test
+    void bothPasswordBoxesAreRequired() {
+        assertThat(passwordProblems("", "")).containsExactlyInAnyOrder(
+                "Please create a password.", "Please type your password again under \"Confirm password\".");
+    }
+
+    private List<String> passwordProblems(String password, String confirmPassword) {
+        return validator.validate(new SaveNameRequest("Juan", "Cruz", password, confirmPassword)).stream()
+                .map(ConstraintViolation::getMessage)
+                .toList();
     }
 
     private List<String> problemsWith(String firstName, String lastName) {
-        return validator.validate(new SaveNameRequest(firstName, lastName)).stream()
+        return validator.validate(new SaveNameRequest(firstName, lastName, "sunflower42", "sunflower42")).stream()
                 .map(ConstraintViolation::getMessage)
                 .toList();
     }

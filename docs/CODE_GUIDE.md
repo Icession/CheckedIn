@@ -40,6 +40,8 @@ requirement to its code.
 |---|---|---|
 | `common/` | — | Setup checks (health check, test email), global error handler, shared config, security config |
 | `auth/` | Feature 1: Sign-in and roles | `User`, `Role`, `LoginCode`, email-code and GitHub sign-in, student ID linking |
+| `profile/` | Increment 2: the user's own profile | `ProfileController` (`GET`/`PUT /api/profile`), `ProfileService`, `dto/ProfileResponse`, `dto/UpdateProfileRequest` (name rules shared with the first-sign-in form in `auth/NameRules`) |
+| `password/` | Increment 2: passwords | `PasswordController` (sign-in, forgot, reset, change), `PasswordSignInService`, `PasswordResetService` + `PasswordResetToken` + `PasswordResetTokenRepository` + `PasswordResetSettings` (reset links), `PasswordChangeService`, `PasswordRules` (shared rules and messages), `PasswordLockout` + `PasswordLockoutRepository` (5 wrong tries -> 15-minute block), `PasswordSettings`, `dto/` (`PasswordSignInRequest`, `ForgotPasswordRequest`, `ResetPasswordRequest`, `ChangePasswordRequest`) |
 | `section/` | Feature 2: Sections and sessions | `CourseSection`, `ClassSession`, schedule rules |
 | `layout/` | Feature 3: Layout builder | `RoomLayout`, `Seat`, `CellType` |
 | `roster/` | Feature 4: Class list import | `Enrollment`, Excel import and validation |
@@ -109,6 +111,9 @@ When a feature has several pages, group them: `pages/attendance/AttendancePage.j
 | Sign-in page (email code and GitHub button) | `frontend/src/pages/SignInPage.jsx` |
 | Who may open which page (403 on the wrong role) | `common/SecurityConfig.java` and `auth/RoleService.java` |
 | The menu for each role and the frontend route guard | `frontend/src/components/PageHeader.jsx`, `components/RequireRole.jsx` (around the routes in `App.jsx`), `utils/roles.js`, `hooks/useCurrentUser.js` |
+| The profile page (view details, change the name) | `frontend/src/pages/ProfilePage.jsx`, `components/ProfileDetails.jsx`, `components/ProfileNameForm.jsx`, `api/profileApi.js`; name rules in `utils/nameRules.js` (frontend) and `auth/NameRules.java` (backend) |
+| Password sign-in and the first password | Backend: `password/PasswordSignInService.java`, `password/PasswordRules.java`, the first password in `auth/AuthService.saveName`. Frontend: `components/PasswordSignInForm.jsx`, `components/NameForm.jsx`, `utils/passwordRules.js`, `signInWithPassword` in `api/authApi.js` |
+| Forgot password, reset link, change password | Backend: `password/PasswordResetService.java` (link, SHA-256 hash, single use), `password/PasswordChangeService.java`, email text in `integration/EmailTemplate.java` (`PASSWORD_RESET`). Frontend: `pages/ForgotPasswordPage.jsx`, `pages/ResetPasswordPage.jsx`, `components/ChangePasswordForm.jsx` (on `pages/ProfilePage.jsx`) |
 | Sign out | `auth/SessionService.java` (`POST /api/auth/sign-out` in `auth/AuthController.java`) |
 | How sign-in codes are made, hashed and checked | `auth/LoginCodeService.java` |
 | GitHub verified-email check | `integration/GitHubIdentityProvider.java` (reads GitHub's verified emails) and `auth/GitHubUserService.java` (requires a verified @cit.edu one) |

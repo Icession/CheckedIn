@@ -23,6 +23,19 @@ public enum EmailTemplate {
             If you did not try to sign in to CheckedIn, you can ignore this email.
             """),
 
+    // Increment 2 / SRS v1.4: "Forgot password?" (also how an older account sets its first password)
+    PASSWORD_RESET(
+            "Set your CheckedIn password",
+            """
+            Someone (hopefully you) asked to set a new password for your CheckedIn account.
+
+            Open this link to choose your password:
+                {link}
+
+            The link works once and expires in {minutes} minutes.
+            If you did not ask for this, you can ignore this email: your password stays the same.
+            """),
+
     // Setup check (step 1d): proves that emails from CheckedIn reach a @cit.edu inbox
     TEST_EMAIL(
             "CheckedIn test email",
