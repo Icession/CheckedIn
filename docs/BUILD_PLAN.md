@@ -82,7 +82,7 @@ Ask Claude Code: *"Start Phase 2 from docs/BUILD_PLAN.md."*
 
 ---
 
-## Increment 2 — User profile and password management (SRS v1.4)
+## Increment 2 — User profile and password management (SRS v1.4) ✅
 
 Built on branches `feature/*` → `develop` → `main` (see "How we use Git branches" in the README).
 Password sign-in is ADDED as a third way to sign in; email code and GitHub keep working as before.
@@ -113,7 +113,7 @@ Requirement IDs: "Increment 2 / SRS v1.4" until the SRS v1.4 numbers are final.
         differ from the current one). Afterwards the old password no longer works, open reset links are used up,
         and the session stays. Accounts without a password see "Set a password" (link to "Forgot password?").
   - [x] Profile shows the student ID only for students (a professor's leftover student ID is hidden).
-- [ ] Release: one pull request `develop` → `main` ("Increment 2 release")
+- [x] Release: one pull request `develop` → `main` ("Increment 2 release", PR #6)
 
 ## Phase 3 — Room and lab layout builder (Feature 3: FR-017 – FR-023)
 
