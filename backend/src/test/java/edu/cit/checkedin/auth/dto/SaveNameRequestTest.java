@@ -51,10 +51,10 @@ class SaveNameRequestTest {
     }
 
     @Test
-    void allowsSixtyCharactersButNotSixtyOne() {
-        assertThat(problemsWith("A".repeat(60), "Cruz")).isEmpty();
-        assertThat(problemsWith("A".repeat(61), "Cruz"))
-                .containsExactly("Your first name can have at most 60 characters.");
+    void allowsFiftyCharactersButNotFiftyOne() {
+        assertThat(problemsWith("A".repeat(50), "Cruz")).isEmpty();
+        assertThat(problemsWith("A".repeat(51), "Cruz"))
+                .containsExactly("Your first name can have at most 50 characters.");
     }
 
     private List<String> problemsWith(String firstName, String lastName) {

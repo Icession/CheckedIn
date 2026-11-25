@@ -33,6 +33,17 @@ Built in Phase 1 (see [`docs/BUILD_PLAN.md`](docs/BUILD_PLAN.md)). Backend paths
 in the `backend` folder, and the frontend with `npm install` (first time only) and `npm run dev` in the `frontend`
 folder. Open http://localhost:5173. The full steps are in "Run the project (Windows)".
 
+## Project Increment 2 – User Profile and Password Management
+
+Built on branches `feature/*` → `develop` → `main` (see "How we use Git branches" below). CheckedIn was
+passwordless; Increment 2 **adds** password sign-in as a third way to sign in. Email code and GitHub sign-in
+keep working as before. Progress: [`docs/BUILD_PLAN.md`](docs/BUILD_PLAN.md) ("Increment 2").
+
+| Requirement | What we built | Where the code is |
+|---|---|---|
+| View profile | `/profile` for professors and students, linked in the menu ("Profile"). Shows the email, role, student ID (students) and the day the account was created. Email, role and student ID are read-only: the email is the sign-in identity, the role comes from `PROFESSOR_EMAILS`, and the student ID links to class records. | `profile/ProfileController.java` (`GET /api/profile`), `profile/ProfileService.java`, `pages/ProfilePage.jsx`, `components/ProfileDetails.jsx` |
+| Edit profile | First and last name can be changed: required, trimmed, 1–50 letters, spaces, hyphens, apostrophes and periods ("Ma. Cristina", "Dela Cruz"). Checked on the page and again on the server (400 with a plain message). `GET`/`PUT /api/profile` always use the signed-in user from the session, never a user ID in the URL or body, so nobody can edit someone else's profile. | `profile/dto/UpdateProfileRequest.java`, `auth/NameRules.java`, `components/ProfileNameForm.jsx`, `utils/nameRules.js` |
+
 ## Tech stack
 
 - **Backend:** Java 17, Spring Boot 3.3, Maven, Spring Data JPA
@@ -240,6 +251,9 @@ To check the setup, open http://localhost:5173/setup. You should see **Backend: 
 ```bash
 cd backend
 .\mvnw.cmd test
+
+cd frontend
+npm test                    # unit tests of the helper functions (Node's built-in test runner)
 ```
 
 ## Troubleshooting

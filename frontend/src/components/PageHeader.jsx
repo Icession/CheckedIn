@@ -7,7 +7,7 @@ import useCurrentUser from '../hooks/useCurrentUser.js'
 import { NAV_LINKS, ROLE_LABELS } from '../utils/roles.js'
 
 export default function PageHeader() {
-  const currentUser = useCurrentUser()
+  const { currentUser } = useCurrentUser()
 
   return (
     <header className="dashboard-header">
