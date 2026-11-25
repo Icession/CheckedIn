@@ -29,6 +29,10 @@ package "Controllers (REST API)" #FAFAFA {
   class StudentDashboardController {
     + getDashboard()
   }
+  class ProfileController {
+    + getProfile()
+    + updateProfile(request)
+  }
 }
 
 package "Services" #FAFAFA {
@@ -77,6 +81,10 @@ package "Services" #FAFAFA {
   class ProfessorDashboardService {
     + getDashboard(email)
   }
+  class ProfileService {
+    + getProfile(email) : ProfileResponse
+    + updateName(email, request) : ProfileResponse
+  }
 }
 
 package "External Integration" #FAFAFA {
@@ -109,6 +117,8 @@ SectionService --> SessionScheduleChecker
 ProfessorDashboardController --> ProfessorDashboardService
 ProfessorDashboardService --> SectionService
 StudentDashboardController --> AuthService
+ProfileController --> ProfileService
+ProfileService --> AuthService
 
 IdentityProvider <|.. GitHubIdentityProvider
 EmailService <|.. BrevoEmailService

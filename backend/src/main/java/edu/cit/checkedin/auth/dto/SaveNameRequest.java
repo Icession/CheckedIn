@@ -4,43 +4,30 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import edu.cit.checkedin.auth.NameRules;
+
 /**
  * JSON for POST /api/auth/name: the name every new user enters on first sign-in (FR-003).
- * Names may have letters from any language (so ñ and accents work), spaces, hyphens,
- * apostrophes and periods, e.g. "Dela Cruz", "O'Neil", "Ma. Clara". At most 60 characters each,
- * like the first_name and last_name columns in the ERD.
+ * The rules are shared with the profile page (see NameRules): required, at most 50 characters, letters
+ * from any language, spaces, hyphens, apostrophes and periods, e.g. "Dela Cruz", "O'Neil", "Ma. Clara".
  *
- * @param firstName the user's first name, cleaned up as described below
- * @param lastName  the user's last name, cleaned up as described below
+ * @param firstName the user's first name, cleaned up (see NameRules.cleanUp)
+ * @param lastName  the user's last name, cleaned up (see NameRules.cleanUp)
  */
 public record SaveNameRequest(
-        @NotBlank(message = "Please enter your first name.")
-        @Size(max = 60, message = "Your first name can have at most 60 characters.")
-        @Pattern(regexp = NAME_PATTERN, message = "Please use only letters, spaces, hyphens (-), "
-                + "apostrophes (') and periods (.) in your first name.")
+        @NotBlank(message = NameRules.FIRST_NAME_MISSING)
+        @Size(max = NameRules.MAX_LENGTH, message = NameRules.FIRST_NAME_TOO_LONG)
+        @Pattern(regexp = NameRules.PATTERN, message = NameRules.FIRST_NAME_CHARACTERS)
         String firstName,
 
-        @NotBlank(message = "Please enter your last name.")
-        @Size(max = 60, message = "Your last name can have at most 60 characters.")
-        @Pattern(regexp = NAME_PATTERN, message = "Please use only letters, spaces, hyphens (-), "
-                + "apostrophes (') and periods (.) in your last name.")
+        @NotBlank(message = NameRules.LAST_NAME_MISSING)
+        @Size(max = NameRules.MAX_LENGTH, message = NameRules.LAST_NAME_TOO_LONG)
+        @Pattern(regexp = NameRules.PATTERN, message = NameRules.LAST_NAME_CHARACTERS)
         String lastName) {
 
-    // Empty is let through here so that only the "Please enter..." message shows for a blank name.
-    // Otherwise: at least one letter (\p{L} = a letter in any language, \p{M} = an accent mark),
-    // plus spaces, periods, apostrophes (straight ' and the curly ’ that phone keyboards type) and hyphens.
-    static final String NAME_PATTERN = "^$|^(?=.*\\p{L})[\\p{L}\\p{M} .'’-]+$";
-
-    /**
-     * Runs before the checks above: removes spaces at both ends and turns runs of spaces into
-     * one, so "  Juan   Carlos " is saved as "Juan Carlos".
-     */
+    /** Runs before the checks above, so "  Juan   Carlos " is checked and saved as "Juan Carlos". */
     public SaveNameRequest {
-        firstName = cleanUp(firstName);
-        lastName = cleanUp(lastName);
-    }
-
-    private static String cleanUp(String name) {
-        return (name == null) ? null : name.trim().replaceAll("\\s+", " ");
+        firstName = NameRules.cleanUp(firstName);
+        lastName = NameRules.cleanUp(lastName);
     }
 }

@@ -1,4 +1,5 @@
-// RequireRole — the frontend route guard (FR-008): only the given role may open the pages inside it.
+// RequireRole — the frontend route guard (FR-008): only the allowed roles may open the pages inside it
+// (allowedRoles, e.g. ['PROFESSOR'], or both roles for the profile page).
 // - Not signed in, or sign-in not finished (no name or student ID yet) -> the sign-in page (/)
 // - Signed in with the other role -> their own dashboard
 // - While asking the backend who is signed in: "Loading…"
@@ -10,7 +11,7 @@ import { getCurrentUser } from '../api/authApi.js'
 import { CurrentUserContext } from '../hooks/useCurrentUser.js'
 import { DASHBOARD_PATHS } from '../utils/roles.js'
 
-export default function RequireRole({ role }) {
+export default function RequireRole({ allowedRoles }) {
   const [isChecking, setIsChecking] = useState(true)
   const [currentUser, setCurrentUser] = useState(null)
 
@@ -33,11 +34,11 @@ export default function RequireRole({ role }) {
   if (!signInIsFinished) {
     return <Navigate to="/" replace />
   }
-  if (currentUser.role !== role) {
+  if (!allowedRoles.includes(currentUser.role)) {
     return <Navigate to={DASHBOARD_PATHS[currentUser.role]} replace />
   }
   return (
-    <CurrentUserContext.Provider value={currentUser}>
+    <CurrentUserContext.Provider value={{ currentUser, setCurrentUser }}>
       <Outlet />
     </CurrentUserContext.Provider>
   )

@@ -82,6 +82,25 @@ Ask Claude Code: *"Start Phase 2 from docs/BUILD_PLAN.md."*
 
 ---
 
+## Increment 2 — User profile and password management (SRS v1.4)
+
+Built on branches `feature/*` → `develop` → `main` (see "How we use Git branches" in the README).
+Password sign-in is ADDED as a third way to sign in; email code and GitHub keep working as before.
+Requirement IDs: "Increment 2 / SRS v1.4" until the SRS v1.4 numbers are final.
+
+- [ ] Step 1 – `feature/user-profile`: `/profile` page for both roles, linked in the menu ("Profile").
+      Shows email, role, student ID (students) and the day the account was created (read-only, with the
+      reason). First and last name can be changed: required, trimmed, 1–50 letters, spaces, hyphens,
+      apostrophes and periods ("Ma. Cristina", "Dela Cruz"). `GET`/`PUT /api/profile` always use the
+      signed-in user from the session (no user ID in the URL or body). One name rule for the profile and the
+      first-sign-in name form (`NameRules`), now 50 characters for both (was 60 on the name form).
+- [ ] Step 2 – `feature/password-sign-in`: `users.password_hash` (BCrypt), password rules, "Create a password"
+      on first sign-in, "Sign in with password", 5 wrong tries -> 15-minute block
+- [ ] Step 3 – `feature/forgot-password`: reset link by email (`password_reset_tokens`, SHA-256 hash only,
+      30 minutes, 3 requests per 15 minutes), `/forgot-password` and `/reset-password`
+- [ ] Step 4 – `feature/change-password`: on the profile page (current, new, confirm)
+- [ ] Release: one pull request `develop` → `main` ("Increment 2 release")
+
 ## Phase 3 — Room and lab layout builder (Feature 3: FR-017 – FR-023)
 
 - [ ] `RoomLayout` and `Seat` entities, `CellType` enum (SEAT, WORKSTATION, TABLE, AISLE, NO_CHAIR)

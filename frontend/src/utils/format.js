@@ -46,3 +46,12 @@ export function currentSchoolYear(today = new Date()) {
   const startsThisYear = today.getMonth() >= 5 // June or later
   return startsThisYear ? `${year}-${year + 1}` : `${year - 1}-${year}`
 }
+
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
+  'October', 'November', 'December']
+
+/** "2026-11-10" (a date from the backend, already in Philippine time) -> "November 10, 2026". */
+export function formatDate(isoDate) {
+  const [year, month, day] = isoDate.split('-').map(Number)
+  return `${MONTH_NAMES[month - 1]} ${day}, ${year}`
+}
