@@ -102,3 +102,16 @@ npm run dev                   # start the app on http://localhost:5173
 npm run lint                  # check code style
 npm run build                 # check that it builds
 ```
+
+## 7. Git branches (the professor's rule)
+
+Never commit to `main`, and never commit straight to `develop`. The model is `feature/*` → `develop` → `main`:
+
+1. Each feature gets its own branch from `develop`, e.g. `feature/user-profile`
+   (documentation-only work: `docs/...`).
+2. When the feature is done and I have tested it, open a pull request into `develop`, merge it with
+   **Create a merge commit** (not "Squash and merge" or "Rebase and merge"), then delete the feature branch.
+3. At the end of an increment: one pull request `develop` → `main` (e.g. "Increment 2 release"), also
+   merged with **Create a merge commit**. The link of that merged pull request is what I submit.
+4. Use `gh` if it is installed and signed in; otherwise give me the exact GitHub links and steps.
+5. `feature/room-layouts` holds the unfinished Phase 3 work (WIP). Never merge it until Phase 3 is done.
