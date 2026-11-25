@@ -10,11 +10,16 @@ import SetupCheckPage from './pages/SetupCheckPage.jsx'
 import NotFoundPage from './pages/NotFoundPage.jsx'
 import RequireRole from './components/RequireRole.jsx'
 import ProfilePage from './pages/ProfilePage.jsx'
+import ForgotPasswordPage from './pages/ForgotPasswordPage.jsx'
+import ResetPasswordPage from './pages/ResetPasswordPage.jsx'
 
 export default function App() {
   return (
     <Routes>
       <Route path="/" element={<SignInPage />} />
+      {/* Increment 2 / SRS v1.4: "Forgot password?" and the page its emailed link opens (no sign-in needed) */}
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       {/* FR-008: RequireRole lets only one role open these pages (signed out -> sign-in page, other role ->
           their own dashboard). The backend still answers 401/403 to every request from the wrong person. */}
       <Route element={<RequireRole allowedRoles={['PROFESSOR']} />}>

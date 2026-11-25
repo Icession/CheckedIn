@@ -43,8 +43,8 @@ public class SecurityConfig {
     // Endpoints anyone may call without being signed in (signing out twice is harmless)
     private static final String[] PUBLIC_URLS = {
         "/api/health", "/api/auth/code", "/api/auth/code/verify", "/api/auth/sign-out", "/error",
-        // Increment 2 / SRS v1.4: password sign-in
-        "/api/auth/password/sign-in"
+        // Increment 2 / SRS v1.4: password sign-in, and "Forgot password?" (asking for a link, using the link)
+        "/api/auth/password/sign-in", "/api/auth/password/forgot", "/api/auth/password/reset"
     };
 
     private final ObjectMapper objectMapper;

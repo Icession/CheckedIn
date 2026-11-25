@@ -45,6 +45,8 @@ keep working as before. Progress: [`docs/BUILD_PLAN.md`](docs/BUILD_PLAN.md) ("I
 | Edit profile | First and last name can be changed: required, trimmed, 1–50 letters, spaces, hyphens, apostrophes and periods ("Ma. Cristina", "Dela Cruz"). Checked on the page and again on the server (400 with a plain message). `GET`/`PUT /api/profile` always use the signed-in user from the session, never a user ID in the URL or body, so nobody can edit someone else's profile. | `profile/dto/UpdateProfileRequest.java`, `auth/NameRules.java`, `components/ProfileNameForm.jsx`, `utils/nameRules.js` |
 | Password sign-in | A third way to sign in, next to the email code and GitHub (which keep working): "Sign in with password instead" on the sign-in page. A wrong email, a wrong password and an account without a password all get the same "Email or password is incorrect.", so nobody can find out which emails have accounts. After 5 wrong passwords for one email, password sign-in for that email is blocked for 15 minutes (`password_lockouts`; numbers in `application.properties`). A right password starts the same HttpOnly 8-hour session. | `password/PasswordController.java` (`POST /api/auth/password/sign-in`), `password/PasswordSignInService.java`, `password/PasswordLockout.java`, `components/PasswordSignInForm.jsx` |
 | Secure password storage | Passwords are stored only as BCrypt hashes in `users.password_hash` (the existing `PasswordEncoder`); a database rule (`users_password_hash_is_bcrypt`) refuses anything else, and no API response contains the hash. Rules on the page and on the server: 8–64 characters, at least one letter and one number, not the email, and "Confirm password" must match. New accounts (email code or GitHub) create their first password on the name form. | `auth/User.java`, `password/PasswordRules.java`, `auth/AuthService.java` (`saveName`), `components/NameForm.jsx`, `utils/passwordRules.js` |
+| Forgot / reset password | "Forgot password?" on the sign-in page opens `/forgot-password`. The answer is always "If that email has an account, we sent a reset link", so it never shows which emails have accounts. Brevo emails a link to `/reset-password?token=…`: the token is 256 random bits, only its SHA-256 hash is stored (`password_reset_tokens`), it works once and for 30 minutes, and one email can ask for at most 3 links per 15 minutes. Saving a new password uses up every open link of that user; a used, expired or unknown link gets a clear message. This is also how an account from before Increment 2 sets its first password. | `password/PasswordResetService.java`, `password/PasswordResetToken.java`, `integration/EmailTemplate.java`, `pages/ForgotPasswordPage.jsx`, `pages/ResetPasswordPage.jsx` |
+| Change password | On the profile page: current password (checked with BCrypt), new password and confirm (same rules, and it must differ from the current one). Afterwards the old password no longer works and open reset links are used up; the user stays signed in. Accounts without a password see "Set a password" with a link to "Forgot password?". | `password/PasswordChangeService.java` (`PUT /api/profile/password`), `components/ChangePasswordForm.jsx`, `pages/ProfilePage.jsx` |
 
 ## Tech stack
 
@@ -134,6 +136,10 @@ BREVO_SENDER_NAME=CheckedIn
 
 The API key is a secret. Keep it only in `backend/.env`, which git ignores (NFR-011).
 Without these settings the app still runs; it just cannot send emails.
+
+The "Set your CheckedIn password" email (Increment 2) links to the frontend. Locally that is
+`http://localhost:5173` and nothing needs to be set; on a deployed site, add `FRONTEND_URL=https://your-site` to
+`backend/.env`.
 
 ### Step 5: Send a test email
 

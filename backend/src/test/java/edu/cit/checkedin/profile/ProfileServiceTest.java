@@ -47,7 +47,25 @@ class ProfileServiceTest {
         ProfileResponse profile = service.getProfile(STUDENT_EMAIL);
 
         assertThat(profile).isEqualTo(new ProfileResponse(STUDENT_EMAIL, "Juan", "Cruz", Role.STUDENT,
-                "22-1234-567", LocalDate.of(2026, 11, 10)));
+                "22-1234-567", LocalDate.of(2026, 11, 10), false));
+    }
+
+    @Test
+    void aProfessorNeverSeesAStudentIdLinkedEarlier() {
+        when(authService.requireAccount(STUDENT_EMAIL)).thenReturn(juan()); // has a student ID from before
+        when(authService.assignRole(STUDENT_EMAIL)).thenReturn(Role.PROFESSOR); // now on the professor list
+
+        assertThat(service.getProfile(STUDENT_EMAIL).studentNumber()).isNull();
+    }
+
+    @Test
+    void tellsWhetherTheAccountHasAPasswordButNeverTheHash() {
+        User juan = juan();
+        juan.setPasswordHash("$2a$10$" + "x".repeat(53));
+        when(authService.requireAccount(STUDENT_EMAIL)).thenReturn(juan);
+        when(authService.assignRole(STUDENT_EMAIL)).thenReturn(Role.STUDENT);
+
+        assertThat(service.getProfile(STUDENT_EMAIL).hasPassword()).isTrue();
     }
 
     @Test

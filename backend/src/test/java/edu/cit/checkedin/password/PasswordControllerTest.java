@@ -53,6 +53,10 @@ class PasswordControllerTest {
     @MockBean
     private PasswordSignInService passwordSignInService;
     @MockBean
+    private PasswordResetService passwordResetService;
+    @MockBean
+    private PasswordChangeService passwordChangeService;
+    @MockBean
     private AuthService authService;
     @MockBean
     private LoginCodeService loginCodeService;
@@ -98,11 +102,14 @@ class PasswordControllerTest {
     }
 
     @Test
-    void noResponseSentToTheBrowserHasAPasswordField() {
+    void noResponseSentToTheBrowserHoldsAPasswordOrAHash() {
+        // Only the yes/no "hasPassword" is allowed; no text field may carry a password or a hash
         for (Class<?> response : List.of(CurrentUserResponse.class, ProfileResponse.class, StudentDashboardResponse.class)) {
-            assertThat(Arrays.stream(response.getRecordComponents()).map(RecordComponent::getName))
+            assertThat(Arrays.stream(response.getRecordComponents())
+                    .filter(component -> component.getType() == String.class)
+                    .map(RecordComponent::getName))
                     .as(response.getSimpleName())
-                    .noneMatch(name -> name.toLowerCase().contains("password"));
+                    .noneMatch(name -> name.toLowerCase().contains("password") || name.toLowerCase().contains("hash"));
         }
     }
 

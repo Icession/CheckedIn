@@ -2,6 +2,7 @@
 // email code and GitHub. A wrong email, a wrong password and an account without a password all get the same
 // message, so the hint for accounts without a password is shown after every failed try.
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { signInWithPassword } from '../api/authApi.js'
 
 export default function PasswordSignInForm({ onSignedIn }) {
@@ -41,8 +42,9 @@ export default function PasswordSignInForm({ onSignedIn }) {
       </button>
       {error && <p className="error-text" role="alert">{error}</p>}
       {showNoPasswordHint && (
-        <p className="hint-text">Never set a password? Sign in with an email code or GitHub instead.</p>
+        <p className="hint-text">Never set a password? Use &ldquo;Forgot password?&rdquo; to set one.</p>
       )}
+      <Link to="/forgot-password">Forgot password?</Link>
     </form>
   )
 }
