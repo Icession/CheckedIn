@@ -29,23 +29,12 @@ package "Controllers (REST API)" #FAFAFA {
   class StudentDashboardController {
     + getDashboard()
   }
-  class ProfileController {
-    + getProfile()
-    + updateProfile(request)
-  }
-  class PasswordController {
-    + signIn(request)
-    + forgotPassword(request)
-    + resetPassword(request)
-    + changePassword(request)
-  }
 }
 
 package "Services" #FAFAFA {
   class AuthService {
     + signInWithCode(email, code)
     + signInWithGitHub(githubId, email)
-    + signInWithPassword(email)
     + saveName(email, githubId, request)
     + linkStudentNumber(email, number)
     + assignRole(email) : Role
@@ -88,21 +77,6 @@ package "Services" #FAFAFA {
   class ProfessorDashboardService {
     + getDashboard(email)
   }
-  class ProfileService {
-    + getProfile(email) : ProfileResponse
-    + updateName(email, request) : ProfileResponse
-  }
-  class PasswordSignInService {
-    + signIn(email, password) : CurrentUserResponse
-  }
-  class PasswordResetService {
-    + requestReset(email)
-    + resetPassword(request)
-    + useUpOpenLinks(user, now)
-  }
-  class PasswordChangeService {
-    + changePassword(email, request)
-  }
 }
 
 package "External Integration" #FAFAFA {
@@ -135,18 +109,6 @@ SectionService --> SessionScheduleChecker
 ProfessorDashboardController --> ProfessorDashboardService
 ProfessorDashboardService --> SectionService
 StudentDashboardController --> AuthService
-ProfileController --> ProfileService
-ProfileService --> AuthService
-PasswordController --> PasswordSignInService
-PasswordController --> SessionService
-PasswordSignInService --> AuthService
-PasswordSignInService --> EmailAddressChecker
-PasswordController --> PasswordResetService
-PasswordController --> PasswordChangeService
-PasswordResetService --> EmailService
-PasswordResetService --> EmailAddressChecker
-PasswordChangeService --> AuthService
-PasswordChangeService --> PasswordResetService
 
 IdentityProvider <|.. GitHubIdentityProvider
 EmailService <|.. BrevoEmailService

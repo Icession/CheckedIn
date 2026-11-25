@@ -206,5 +206,7 @@ Done when: you can check a 42-student class in under 2 minutes (NFR-016).
 
 - [ ] Check every FR and NFR in the SRS against the app (use SRS Appendix A)
 - [ ] Usability test: 3 people check attendance for 42 students
+- [ ] Before deployment: change the test account password listed in the Increment 2 report
+      (`docs/Increment-2-Completion-Report.pdf`, Section 5)
 - [ ] Deploy frontend (Vercel/Netlify) and backend (Render/Railway); the database is already online on Supabase
 - [ ] Update README with the live links and screenshots
