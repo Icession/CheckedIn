@@ -15,7 +15,11 @@ export default function ProfileDetails({ profile }) {
       <dt>Role</dt>
       <dd>
         {ROLE_LABELS[profile.role]}
-        <span className="hint-text">Set by the school&apos;s list of professors.</span>
+        <span className="hint-text">
+          {profile.role === 'PROFESSOR'
+            ? 'You’re on the school’s list of professors.'
+            : 'Professors are set by the school’s list; everyone else is a student.'}
+        </span>
       </dd>
 
       {profile.studentNumber && (

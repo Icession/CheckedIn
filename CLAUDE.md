@@ -28,7 +28,7 @@ unless I say yes first. If a new library is truly needed, explain why and ask.
 
 ## 3. Key business rules (from the SRS)
 
-- Sign-in (Feature 1): two ways, and NO passwords are ever stored.
+- Sign-in (Feature 1): three ways. Plain-text passwords are NEVER stored (only BCrypt hashes).
   1. Email code: user enters an @cit.edu email, Brevo sends a 6-digit code. Codes are saved only
      as a hash, expire after 10 minutes, allow 5 wrong tries, work once, and an email can request
      at most 3 codes every 15 minutes (NFR-008).
@@ -37,8 +37,12 @@ unless I say yes first. If a new library is truly needed, explain why and ask.
      checked, and the account is accepted only if GitHub's email list (`/user/emails`, scope
      `user:email`) has a VERIFIED address ending in @cit.edu. That email identifies the user;
      the numeric GitHub ID is saved as `githubId`.
-  On first sign-in EVERY user (both methods) enters first and last name before the account row
-  is saved (FR-003).
+  3. Password (added in Increment 2 / SRS v1.4): email + password. Saved only as a BCrypt hash in
+     `users.password_hash` (never returned by any API). Rules: 8–64 characters, at least one letter and one
+     number, not the email. A wrong email, a wrong password and an account without a password get the same
+     message; 5 wrong passwords for one email block password sign-in for 15 minutes.
+  On first sign-in EVERY user (all methods) enters first and last name, and creates a password, before the
+  account row is saved (FR-003). Accounts from before Increment 2 set their first password with "Forgot password?".
   Allowed email domain(s) and the professor email list live in `application.properties` / `.env`.
 - Student ID format: `00-0000-000` (regex `^\d{2}-\d{4}-\d{3}$`).
 - Attendance statuses and colors: PRESENT = green (P), LATE = yellow (L),

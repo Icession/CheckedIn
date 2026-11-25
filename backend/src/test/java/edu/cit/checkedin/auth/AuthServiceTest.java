@@ -29,6 +29,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import edu.cit.checkedin.auth.dto.CurrentUserResponse;
 import edu.cit.checkedin.auth.dto.SaveNameRequest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * Tests account creation, roles and the student ID (FR-001, FR-003 – FR-006) with a fake database.
@@ -42,6 +44,9 @@ class AuthServiceTest {
     private static final String PROFESSOR_EMAIL = "maria.santos@cit.edu";
     private static final String STUDENT_EMAIL = "juan.delacruz@cit.edu";
     private static final Long GITHUB_ID = 583231L;
+    private static final String PASSWORD = "sunflower42";
+    // A fast BCrypt (cost 4) for tests; the app uses the normal cost
+    private static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder(4);
 
     @Mock
     private UserRepository userRepository;
@@ -54,7 +59,7 @@ class AuthServiceTest {
     void setUp() {
         // The real RoleService (RoleServiceTest tests the list rules themselves)
         RoleService roleService = new RoleService(new EmailAddressChecker(List.of("cit.edu")), List.of(PROFESSOR_EMAIL));
-        service = new AuthService(userRepository, loginCodeService, roleService,
+        service = new AuthService(userRepository, loginCodeService, roleService, PASSWORD_ENCODER,
                 Clock.fixed(NOW.atZone(MANILA).toInstant(), MANILA));
     }
 
@@ -142,7 +147,7 @@ class AuthServiceTest {
         when(userRepository.findByGithubId(GITHUB_ID)).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenAnswer(call -> call.getArgument(0));
 
-        CurrentUserResponse result = service.saveName(PROFESSOR_EMAIL, GITHUB_ID, new SaveNameRequest("Maria", "Dela Cruz"));
+        CurrentUserResponse result = service.saveName(PROFESSOR_EMAIL, GITHUB_ID, new SaveNameRequest("Maria", "Dela Cruz", PASSWORD, PASSWORD));
 
         ArgumentCaptor<User> savedUser = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(savedUser.capture());
@@ -159,7 +164,7 @@ class AuthServiceTest {
         when(userRepository.findByEmail(STUDENT_EMAIL)).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenAnswer(call -> call.getArgument(0));
 
-        CurrentUserResponse result = service.saveName(STUDENT_EMAIL, null, new SaveNameRequest("Juan", "Dela Cruz"));
+        CurrentUserResponse result = service.saveName(STUDENT_EMAIL, null, new SaveNameRequest("Juan", "Dela Cruz", PASSWORD, PASSWORD));
 
         assertThat(result.role()).isEqualTo(Role.STUDENT);
         verify(userRepository, never()).findByGithubId(any());
@@ -169,8 +174,38 @@ class AuthServiceTest {
     void savingTheNameAgainDoesNotCreateASecondAccount() {
         when(userRepository.findByEmail(STUDENT_EMAIL)).thenReturn(Optional.of(existingUser(STUDENT_EMAIL, Role.STUDENT)));
 
-        service.saveName(STUDENT_EMAIL, null, new SaveNameRequest("Juan", "Dela Cruz"));
+        service.saveName(STUDENT_EMAIL, null, new SaveNameRequest("Juan", "Dela Cruz", PASSWORD, PASSWORD));
 
+        verify(userRepository, never()).save(any());
+    }
+
+    // ---------- Increment 2 / SRS v1.4: the first password, created with the account ----------
+
+    @Test
+    void theFirstPasswordIsSavedOnlyAsABCryptHash() {
+        when(userRepository.findByEmail(STUDENT_EMAIL)).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenAnswer(call -> call.getArgument(0));
+
+        service.saveName(STUDENT_EMAIL, null, new SaveNameRequest("Juan", "Dela Cruz", PASSWORD, PASSWORD));
+
+        ArgumentCaptor<User> savedUser = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(savedUser.capture());
+        String hash = savedUser.getValue().getPasswordHash();
+        assertThat(hash).isNotEqualTo(PASSWORD).startsWith("$2").hasSize(60);
+        assertThat(PASSWORD_ENCODER.matches(PASSWORD, hash)).isTrue();
+    }
+
+    @Test
+    void thePasswordCantBeTheEmailAndBothBoxesMustMatch() {
+        when(userRepository.findByEmail(STUDENT_EMAIL)).thenReturn(Optional.empty());
+        String emailInOtherLetters = "Juan.DelaCruz@cit.edu";
+
+        assertThatThrownBy(() -> service.saveName(STUDENT_EMAIL, null,
+                new SaveNameRequest("Juan", "Dela Cruz", emailInOtherLetters, emailInOtherLetters)))
+                .hasMessageContaining("can't be your email address");
+        assertThatThrownBy(() -> service.saveName(STUDENT_EMAIL, null,
+                new SaveNameRequest("Juan", "Dela Cruz", PASSWORD, "sunflower43")))
+                .hasMessageContaining("don't match");
         verify(userRepository, never()).save(any());
     }
 

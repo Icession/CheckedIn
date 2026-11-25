@@ -6,12 +6,14 @@ import java.util.Optional;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import edu.cit.checkedin.auth.dto.CurrentUserResponse;
 import edu.cit.checkedin.auth.dto.SaveNameRequest;
+import edu.cit.checkedin.password.PasswordRules;
 
 /**
  * Turns a proven @cit.edu email into a CheckedIn account.
@@ -19,6 +21,7 @@ import edu.cit.checkedin.auth.dto.SaveNameRequest;
  * FR-003 (the account is created only after the user enters their name),
  * FR-004 (role from the professor list; the stored role is kept in step with it) and
  * FR-005 – FR-006 (a student links one student ID, which no other account may use).
+ * Increment 2 / SRS v1.4: the first password is created together with the account, and is saved only as a hash.
  */
 @Service
 public class AuthService {
@@ -26,13 +29,15 @@ public class AuthService {
     private final UserRepository userRepository;
     private final LoginCodeService loginCodeService;
     private final RoleService roleService;
+    private final PasswordEncoder passwordEncoder;
     private final Clock clock;
 
     public AuthService(UserRepository userRepository, LoginCodeService loginCodeService,
-                       RoleService roleService, Clock clock) {
+                       RoleService roleService, PasswordEncoder passwordEncoder, Clock clock) {
         this.userRepository = userRepository;
         this.loginCodeService = loginCodeService;
         this.roleService = roleService;
+        this.passwordEncoder = passwordEncoder;
         this.clock = clock;
     }
 
@@ -52,6 +57,12 @@ public class AuthService {
     @Transactional
     public CurrentUserResponse signInWithGitHub(Long githubId, String verifiedEmail) {
         return recordSignIn(verifiedEmail, githubId);
+    }
+
+    /** Password sign-in, after PasswordSignInService checked the password (Increment 2 / SRS v1.4). */
+    @Transactional
+    public CurrentUserResponse signInWithPassword(String verifiedEmail) {
+        return recordSignIn(verifiedEmail, null);
     }
 
     /**
@@ -89,8 +100,9 @@ public class AuthService {
     }
 
     /**
-     * FR-003: creates the account once the user has entered their name. Until then no row exists,
-     * so someone who closes the page before this step just sees the name form again next time.
+     * FR-003: creates the account once the user has entered their name (and, since Increment 2, their first
+     * password). Until then no row exists, so someone who closes the page before this step just sees the name
+     * form again next time.
      */
     @Transactional
     public CurrentUserResponse saveName(String verifiedEmail, Long githubId, SaveNameRequest request) {
@@ -99,7 +111,9 @@ public class AuthService {
             // Already created (for example by a double click): keep it as it is
             return CurrentUserResponse.from(existingUser.get());
         }
+        PasswordRules.checkNotEmailAndConfirmed(request.password(), request.confirmPassword(), verifiedEmail);
         User user = new User(verifiedEmail, request.firstName(), request.lastName(), assignRole(verifiedEmail));
+        user.setPasswordHash(passwordEncoder.encode(request.password()));
         user.setLastLoginAt(LocalDateTime.now(clock));
         if (githubId != null) {
             linkGitHubAccount(user, githubId);
